@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.shield
 import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.base.internal.MapboxUtilDownloader
 import io.mockk.coEvery
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -25,14 +26,14 @@ class ShieldSpritesCacheTest {
 
     @Before
     fun setup() {
-        mockkObject(RoadShieldDownloader)
+        mockkObject(MapboxUtilDownloader)
     }
 
     @Test
     fun `download error`() = coroutineRule.runBlockingTest {
         val argument = "url"
         coEvery {
-            RoadShieldDownloader.download(argument)
+            MapboxUtilDownloader.download(argument)
         } returns ExpectedFactory.createError("error")
 
         val result = cache.getOrRequest(argument)
@@ -44,7 +45,7 @@ class ShieldSpritesCacheTest {
     fun `parsing error`() = coroutineRule.runBlockingTest {
         val argument = "url"
         coEvery {
-            RoadShieldDownloader.download(argument)
+            MapboxUtilDownloader.download(argument)
         } returns ExpectedFactory.createValue("wrong json".toByteArray())
 
         val result = cache.getOrRequest(argument)
@@ -80,7 +81,7 @@ class ShieldSpritesCacheTest {
             """.trimIndent().toByteArray()
         )
         coEvery {
-            RoadShieldDownloader.download(argument)
+            MapboxUtilDownloader.download(argument)
         } coAnswers {
             delay(500L)
             expectedResult
@@ -93,6 +94,6 @@ class ShieldSpritesCacheTest {
 
     @After
     fun tearDown() {
-        unmockkObject(RoadShieldDownloader)
+        unmockkObject(MapboxUtilDownloader)
     }
 }

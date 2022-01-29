@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.shield
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.base.internal.MapboxUtilDownloader
 import io.mockk.Call
 import io.mockk.MockKAnswerScope
 import io.mockk.coEvery
@@ -49,13 +50,13 @@ class ShieldByteArrayCacheTest {
 
     @Before
     fun setup() {
-        mockkObject(RoadShieldDownloader)
+        mockkObject(MapboxUtilDownloader)
     }
 
     @Test
     fun `single request returns success`() = coroutineRule.runBlockingTest {
         val argument = "url"
-        coEvery { RoadShieldDownloader.download(argument) } returns downloadValueResult
+        coEvery { MapboxUtilDownloader.download(argument) } returns downloadValueResult
 
         val result = cache.getOrRequest(argument)
 
@@ -65,7 +66,7 @@ class ShieldByteArrayCacheTest {
     @Test
     fun `single request returns failure`() = coroutineRule.runBlockingTest {
         val argument = "url"
-        coEvery { RoadShieldDownloader.download(argument) } returns downloadErrorResult
+        coEvery { MapboxUtilDownloader.download(argument) } returns downloadErrorResult
 
         val result = cache.getOrRequest(argument)
 
@@ -76,13 +77,13 @@ class ShieldByteArrayCacheTest {
     fun `cache hit for previous success on synchronous attempt`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } returns downloadValueResult
+            coEvery { MapboxUtilDownloader.download(argument) } returns downloadValueResult
 
             val firstResult = cache.getOrRequest(argument)
             val secondResult = cache.getOrRequest(argument)
 
             coVerify(exactly = 1) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadValueResult.value, firstResult.value)
             assertEquals(downloadValueResult.value, secondResult.value)
@@ -92,14 +93,14 @@ class ShieldByteArrayCacheTest {
     fun `retry for previous failure on synchronous attempt, still fails`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } returns downloadErrorResult
+            coEvery { MapboxUtilDownloader.download(argument) } returns downloadErrorResult
 
             val firstResult = cache.getOrRequest(argument)
             val secondResult = cache.getOrRequest(argument)
 
             // all coroutines are run synchronously, so the second one is not suspending
             coVerify(exactly = 2) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadErrorResult.error, firstResult.error)
             assertEquals(downloadErrorResult.error, secondResult.error)
@@ -110,14 +111,14 @@ class ShieldByteArrayCacheTest {
         coroutineRule.runBlockingTest {
             val argument = "url"
 
-            coEvery { RoadShieldDownloader.download(argument) } returns downloadErrorResult
+            coEvery { MapboxUtilDownloader.download(argument) } returns downloadErrorResult
             val firstResult = cache.getOrRequest(argument)
-            coEvery { RoadShieldDownloader.download(argument) } returns downloadValueResult
+            coEvery { MapboxUtilDownloader.download(argument) } returns downloadValueResult
             val secondResult = cache.getOrRequest(argument)
 
             // all coroutines are run synchronously, so the second one is not suspending
             coVerify(exactly = 2) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadErrorResult.error, firstResult.error)
             assertEquals(downloadValueResult.value, secondResult.value)
@@ -127,7 +128,7 @@ class ShieldByteArrayCacheTest {
     fun `duplicate async request awaits results for success`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
+            coEvery { MapboxUtilDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
 
             var firstResult: Result? = null
             var secondResult: Result? = null
@@ -141,7 +142,7 @@ class ShieldByteArrayCacheTest {
             }
 
             coVerify(exactly = 1) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadValueResult.value, firstResult!!.value)
             assertEquals(downloadValueResult.value, secondResult!!.value)
@@ -151,7 +152,7 @@ class ShieldByteArrayCacheTest {
     fun `duplicate async request awaits results for failure`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } coAnswers downloadErrorAsyncAnswer
+            coEvery { MapboxUtilDownloader.download(argument) } coAnswers downloadErrorAsyncAnswer
 
             var firstResult: Result? = null
             var secondResult: Result? = null
@@ -165,7 +166,7 @@ class ShieldByteArrayCacheTest {
             }
 
             coVerify(exactly = 1) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadErrorResult.error, firstResult!!.error)
             assertEquals(downloadErrorResult.error, secondResult!!.error)
@@ -178,11 +179,11 @@ class ShieldByteArrayCacheTest {
             val argument2 = "url2"
             val expectedResult1 = ExpectedFactory.createValue<String, ByteArray>(byteArrayOf(0, 1))
             val expectedResult2 = ExpectedFactory.createValue<String, ByteArray>(byteArrayOf(2, 3))
-            coEvery { RoadShieldDownloader.download(argument1) } coAnswers {
+            coEvery { MapboxUtilDownloader.download(argument1) } coAnswers {
                 delay(1000L)
                 expectedResult1
             }
-            coEvery { RoadShieldDownloader.download(argument2) } coAnswers {
+            coEvery { MapboxUtilDownloader.download(argument2) } coAnswers {
                 delay(500L)
                 expectedResult2
             }
@@ -202,8 +203,8 @@ class ShieldByteArrayCacheTest {
 
                 // verify that indeed first was scheduled to be downloaded earlier than second
                 coVerifyOrder {
-                    RoadShieldDownloader.download(argument1)
-                    RoadShieldDownloader.download(argument2)
+                    MapboxUtilDownloader.download(argument1)
+                    MapboxUtilDownloader.download(argument2)
                 }
 
                 // second (shorter) request should already finish while first (longer) is ongoing
@@ -220,7 +221,7 @@ class ShieldByteArrayCacheTest {
     fun `non-overlapping duplicate async request hit cache for success`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
+            coEvery { MapboxUtilDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
 
             var firstResult: Result? = null
             var secondResult: Result? = null
@@ -236,7 +237,7 @@ class ShieldByteArrayCacheTest {
             }
 
             coVerify(exactly = 1) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadValueResult.value, firstResult!!.value)
             assertEquals(downloadValueResult.value, secondResult!!.value)
@@ -246,7 +247,7 @@ class ShieldByteArrayCacheTest {
     fun `non-overlapping duplicate async request retry for failure`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } coAnswers downloadErrorAsyncAnswer
+            coEvery { MapboxUtilDownloader.download(argument) } coAnswers downloadErrorAsyncAnswer
 
             var firstResult: Result? = null
             var secondResult: Result? = null
@@ -257,7 +258,7 @@ class ShieldByteArrayCacheTest {
                 // let first request finish
                 advanceTimeBy(RequestDelay + 100)
                 coEvery {
-                    RoadShieldDownloader.download(argument)
+                    MapboxUtilDownloader.download(argument)
                 } coAnswers downloadValueAsyncAnswer
                 launch {
                     secondResult = cache.getOrRequest(argument)
@@ -265,7 +266,7 @@ class ShieldByteArrayCacheTest {
             }
 
             coVerify(exactly = 2) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
             assertEquals(downloadErrorResult.error, firstResult!!.error)
             assertEquals(downloadValueResult.value, secondResult!!.value)
@@ -279,7 +280,7 @@ class ShieldByteArrayCacheTest {
     fun `awaiting duplicate async request gets canceled if original is canceled`() =
         coroutineRule.runBlockingTest {
             val argument = "url"
-            coEvery { RoadShieldDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
+            coEvery { MapboxUtilDownloader.download(argument) } coAnswers downloadValueAsyncAnswer
 
             var firstResult: Result? = null
             var secondResult: Result? = null
@@ -297,7 +298,7 @@ class ShieldByteArrayCacheTest {
             }
 
             coVerify(exactly = 1) {
-                RoadShieldDownloader.download(argument)
+                MapboxUtilDownloader.download(argument)
             }
 
             // all request get canceled
@@ -307,6 +308,6 @@ class ShieldByteArrayCacheTest {
 
     @After
     fun tearDown() {
-        unmockkObject(RoadShieldDownloader)
+        unmockkObject(MapboxUtilDownloader)
     }
 }

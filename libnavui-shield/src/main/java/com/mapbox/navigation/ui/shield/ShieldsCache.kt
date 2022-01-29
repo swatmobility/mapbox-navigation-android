@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.ShieldSprites
 import com.mapbox.api.directions.v5.models.ShieldSvg
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
+import com.mapbox.navigation.ui.base.internal.MapboxUtilDownloader
 import com.mapbox.navigation.ui.shield.internal.model.RouteShieldToDownload
 import com.mapbox.navigation.ui.shield.internal.model.generateSpriteSheetUrl
 import com.mapbox.navigation.ui.shield.internal.model.getSpriteFrom
@@ -197,7 +198,7 @@ internal class ShieldResultCache(
 
 internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>() {
     override suspend fun obtainResource(argument: String): Expected<String, ShieldSprites> {
-        val result = RoadShieldDownloader.download(argument)
+        val result = MapboxUtilDownloader.download(argument)
         return try {
             result.mapValue { data ->
                 val spriteJson = String(data)
@@ -219,6 +220,6 @@ internal class ShieldSpritesCache : ResourceCache<String, ShieldSprites>() {
 
 internal class ShieldByteArrayCache : ResourceCache<String, ByteArray>() {
     override suspend fun obtainResource(argument: String): Expected<String, ByteArray> {
-        return RoadShieldDownloader.download(argument)
+        return MapboxUtilDownloader.download(argument)
     }
 }
