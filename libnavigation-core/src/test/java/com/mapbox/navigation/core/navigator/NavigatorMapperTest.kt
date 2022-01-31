@@ -495,7 +495,7 @@ class NavigatorMapperTest {
     }
 
     private val directionsRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json")
+        FileUtils.loadFixture("multileg_route.json")
     )
 
     private val nativeBannerInstructions = mockk<BannerInstruction> {

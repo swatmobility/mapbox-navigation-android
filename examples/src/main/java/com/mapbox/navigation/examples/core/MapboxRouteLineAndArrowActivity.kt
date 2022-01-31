@@ -49,6 +49,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.core.databinding.LayoutActivityRoutelineExampleBinding
 import com.mapbox.navigation.ui.maps.NavigationStyles
+import com.mapbox.navigation.ui.maps.guidance.servicearea.api.MapboxServiceAreaApi
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.ui.maps.route.RouteLayerConstants.TOP_LEVEL_ROUTE_LINE_LAYER_ID
 import com.mapbox.navigation.ui.maps.route.arrow.api.MapboxRouteArrowApi
@@ -434,20 +435,26 @@ class MapboxRouteLineAndArrowActivity : AppCompatActivity(), OnMapLongClickListe
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         viewBinding.startNavigation.setOnClickListener {
-            val route = mapboxNavigation.getRoutes().firstOrNull()
-            if (route != null) {
-                mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-                mapboxNavigation.startTripSession()
-                viewBinding.startNavigation.visibility = View.INVISIBLE
-                locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
 
-                // RouteLine: Hiding the alternative routes when navigation starts.
-                mapboxMap.getStyle()?.apply {
-                    routeLineView.hideAlternativeRoutes(this)
-                }
-
-                startSimulation(route)
+            MapboxServiceAreaApi().fetchServiceAreaMap {
+                it.isValue
             }
+
+
+            // val route = mapboxNavigation.getRoutes().firstOrNull()
+            // if (route != null) {
+            //     mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+            //     mapboxNavigation.startTripSession()
+            //     viewBinding.startNavigation.visibility = View.INVISIBLE
+            //     locationComponent.addOnIndicatorPositionChangedListener(onPositionChangedListener)
+            //
+            //     // RouteLine: Hiding the alternative routes when navigation starts.
+            //     mapboxMap.getStyle()?.apply {
+            //         routeLineView.hideAlternativeRoutes(this)
+            //     }
+            //
+            //     startSimulation(route)
+            // }
         }
         viewBinding.mapView.gestures.addOnMapClickListener(mapClickListener)
     }

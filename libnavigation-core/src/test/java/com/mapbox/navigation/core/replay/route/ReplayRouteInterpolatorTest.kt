@@ -291,7 +291,7 @@ class ReplayRouteInterpolatorTest {
 
     @Test
     fun `should not slow down on a freeway`() {
-        val jsonResource = FileUtils.loadJsonFixture("route_with_wide_turns.txt")
+        val jsonResource = FileUtils.loadFixture("route_with_wide_turns.txt")
         val coordinates = LineString.fromJson(jsonResource).coordinates()
         val options = ReplayRouteOptions.Builder()
             .maxSpeedMps(30.0)

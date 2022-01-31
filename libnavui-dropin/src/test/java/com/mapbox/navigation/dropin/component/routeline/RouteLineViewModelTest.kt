@@ -282,7 +282,7 @@ class RouteLineViewModelTest {
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {
-        val routeAsJson = FileUtils.loadJsonFixture(routeFileName)
+        val routeAsJson = FileUtils.loadFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

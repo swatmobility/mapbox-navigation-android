@@ -18,7 +18,7 @@ import com.mapbox.maps.ScreenBox
 import com.mapbox.maps.ScreenCoordinate
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
+import com.mapbox.navigation.testing.FileUtils.loadFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.base.util.MapboxNavigationConsumer
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
@@ -1883,7 +1883,7 @@ class MapboxRouteLineApiTest {
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {
-        val routeAsJson = loadJsonFixture(routeFileName)
+        val routeAsJson = loadFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

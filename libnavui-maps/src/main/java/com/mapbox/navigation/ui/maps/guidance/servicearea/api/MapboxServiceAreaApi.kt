@@ -17,7 +17,7 @@ class MapboxServiceAreaApi {
     // perhaps input should be step intersection
     fun fetchServiceAreaMap(consumer: MapboxNavigationConsumer<Expected<ServiceAreaMapError, ServiceAreaMap>>) {
         jobController.scope.launch {
-            val payload = MapboxUtilDownloader.downloadPayload("https://...").run {
+            val payload = MapboxUtilDownloader.downloadPayload("https://br-temp.s3.amazonaws.com/BM01009A.svg").run {
                 this.fold( {
                     ExpectedFactory.createError<ServiceAreaMapError, ServiceAreaMap>(ServiceAreaMapError(it, null))
                 },{

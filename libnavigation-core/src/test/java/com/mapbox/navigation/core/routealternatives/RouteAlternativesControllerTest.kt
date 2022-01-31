@@ -145,7 +145,7 @@ class RouteAlternativesControllerTest {
             val secondObserver: RouteAlternativesObserver = mockk(relaxed = true)
             routeAlternativesController.register(firstObserver)
             routeAlternativesController.register(secondObserver)
-            val alternativeRouteJson = FileUtils.loadJsonFixture(
+            val alternativeRouteJson = FileUtils.loadFixture(
                 "route_alternative_from_native.json"
             )
             nativeObserver.captured.onRouteAlternativesChanged(
@@ -186,7 +186,7 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        val alternativeRouteJson = FileUtils.loadJsonFixture(
+        val alternativeRouteJson = FileUtils.loadFixture(
             "route_alternative_from_native.json"
         )
         nativeObserver.captured.onRouteAlternativesChanged(
@@ -232,7 +232,7 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        val alternativeRouteJson = FileUtils.loadJsonFixture(
+        val alternativeRouteJson = FileUtils.loadFixture(
             "route_alternative_from_native.json"
         )
         nativeObserver.captured.onRouteAlternativesChanged(
@@ -280,7 +280,7 @@ class RouteAlternativesControllerTest {
 
         val firstObserver: RouteAlternativesObserver = mockk(relaxed = true)
         routeAlternativesController.register(firstObserver)
-        val alternativeRouteJson = FileUtils.loadJsonFixture(
+        val alternativeRouteJson = FileUtils.loadFixture(
             "route_alternative_from_native.json"
         )
         nativeObserver.captured.onRouteAlternativesChanged(
@@ -330,7 +330,7 @@ class RouteAlternativesControllerTest {
         routeAlternativesController.register(observer)
 
         val firstAlternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.response } returns FileUtils.loadFixture(
                 "route_alternative_from_native.json"
             )
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONBOARD
@@ -343,7 +343,7 @@ class RouteAlternativesControllerTest {
             emptyList()
         )
         val secondAlternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.response } returns FileUtils.loadFixture(
                 "route_alternative_from_native.json"
             )
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
@@ -389,7 +389,7 @@ class RouteAlternativesControllerTest {
             routeAlternativesController.register(observer)
 
             val firstAlternative: RouteAlternative = mockk {
-                every { route.response } returns FileUtils.loadJsonFixture(
+                every { route.response } returns FileUtils.loadFixture(
                     "route_alternative_from_native.json"
                 )
                 every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
@@ -428,7 +428,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.response } returns FileUtils.loadFixture(
                 "route_alternative_from_native.json"
             )
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE
@@ -469,7 +469,7 @@ class RouteAlternativesControllerTest {
         val routeAlternativesController = createRouteAlternativesController()
         val nativeObserver = slot<com.mapbox.navigator.RefreshAlternativesCallback>()
         val alternative: RouteAlternative = mockk {
-            every { route.response } returns FileUtils.loadJsonFixture(
+            every { route.response } returns FileUtils.loadFixture(
                 "route_alternative_from_native.json"
             )
             every { route.routerOrigin } returns com.mapbox.navigator.RouterOrigin.ONLINE

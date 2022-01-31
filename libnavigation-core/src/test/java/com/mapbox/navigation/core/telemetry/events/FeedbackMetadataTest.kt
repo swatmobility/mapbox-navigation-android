@@ -15,7 +15,7 @@ import org.junit.Test
 @ExperimentalPreviewMapboxNavigationAPI
 class FeedbackMetadataTest {
 
-    private val jsonFeedbackMetadata = FileUtils.loadJsonFixture("feedback_metadata.json")
+    private val jsonFeedbackMetadata = FileUtils.loadFixture("feedback_metadata.json")
 
     private companion object {
         const val SESSION_IDENTIFIER = "SESSION_IDENTIFIER"

@@ -43,6 +43,6 @@ class MapboxBuildingViewTest {
     }
 
     private fun loadFeature() = Feature.fromJson(
-        FileUtils.loadJsonFixture("arrival-highlight-building-feature.json")
+        FileUtils.loadFixture("arrival-highlight-building-feature.json")
     )
 }

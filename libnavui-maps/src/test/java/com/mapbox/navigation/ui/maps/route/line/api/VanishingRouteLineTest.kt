@@ -6,7 +6,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.testing.FileUtils.loadJsonFixture
+import com.mapbox.navigation.testing.FileUtils.loadFixture
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.ui.maps.internal.route.line.MapboxRouteLineUtils
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineColorResources
@@ -367,7 +367,7 @@ class VanishingRouteLineTest {
     }
 
     private fun loadRoute(routeFileName: String): DirectionsRoute {
-        val routeAsJson = loadJsonFixture(routeFileName)
+        val routeAsJson = loadFixture(routeFileName)
         return DirectionsRoute.fromJson(routeAsJson)
     }
 
@@ -390,7 +390,7 @@ class VanishingRouteLineTest {
     }
 
     private fun getMultilegWithTwoLegs(): DirectionsRoute {
-        val routeAsJson = loadJsonFixture("multileg-route-two-legs.json")
+        val routeAsJson = loadFixture("multileg-route-two-legs.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }

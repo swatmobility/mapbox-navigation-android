@@ -62,12 +62,12 @@ class ViewportDataSourceProcessorTest {
     }
 
     private val multiLegRoute = DirectionsRoute.fromJson(
-        FileUtils.loadJsonFixture("multileg_route.json")
+        FileUtils.loadFixture("multileg_route.json")
     )
 
     private val completeRoutePoints = decodeArrays3(
         Gson().fromJson(
-            FileUtils.loadJsonFixture("multileg_route_all_points_per_step.json"),
+            FileUtils.loadFixture("multileg_route_all_points_per_step.json"),
             List::class.java
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
         pointAdapter
@@ -75,7 +75,7 @@ class ViewportDataSourceProcessorTest {
 
     private val simplifiedCompleteRoutePoints = decodeArrays3(
         Gson().fromJson(
-            FileUtils.loadJsonFixture("multileg_route_simplified_all_points_per_step.json"),
+            FileUtils.loadFixture("multileg_route_simplified_all_points_per_step.json"),
             List::class.java
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
         pointAdapter
@@ -83,7 +83,7 @@ class ViewportDataSourceProcessorTest {
 
     private val postManeuverFramingPoints = decodeArrays3(
         Gson().fromJson(
-            FileUtils.loadJsonFixture("multileg_route_post_maneuver_framing_geometry.json"),
+            FileUtils.loadFixture("multileg_route_post_maneuver_framing_geometry.json"),
             List::class.java
         ) as List<List<List<LinkedTreeMap<String, String>>>>,
         pointAdapter
@@ -91,7 +91,7 @@ class ViewportDataSourceProcessorTest {
 
     private val averageIntersectionDistancesOnRoute = decodeArrays2(
         Gson().fromJson(
-            FileUtils.loadJsonFixture("multileg_route_average_intersection_distances.json"),
+            FileUtils.loadFixture("multileg_route_average_intersection_distances.json"),
             List::class.java
         ) as List<List<Double>>,
         doubleAdapter

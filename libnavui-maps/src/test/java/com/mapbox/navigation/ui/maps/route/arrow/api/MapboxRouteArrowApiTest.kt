@@ -314,7 +314,7 @@ class MapboxRouteArrowApiTest {
 
     private fun getDirectionsRoute(): DirectionsRoute {
         val tokenHere = "someToken"
-        val directionsRouteAsJson = FileUtils.loadJsonFixture("vanish_point_test.txt")
+        val directionsRouteAsJson = FileUtils.loadFixture("vanish_point_test.txt")
             .replace("tokenHere", tokenHere)
 
         return DirectionsRoute.fromJson(directionsRouteAsJson)
@@ -371,7 +371,7 @@ class MapboxRouteArrowApiTest {
     }
 
     private fun getRoute(): DirectionsRoute {
-        val routeAsJson = FileUtils.loadJsonFixture("short_route.json")
+        val routeAsJson = FileUtils.loadFixture("short_route.json")
         return DirectionsRoute.fromJson(routeAsJson)
     }
 }
