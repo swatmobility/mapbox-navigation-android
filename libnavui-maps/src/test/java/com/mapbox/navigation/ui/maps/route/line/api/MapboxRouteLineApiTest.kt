@@ -281,6 +281,20 @@ class MapboxRouteLineApiTest {
     }
 
     @Test
+    fun setRoutes_resetsCache() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
+        val options = MapboxRouteLineOptions.Builder(ctx).build()
+        val api = MapboxRouteLineApi(options)
+        val route = loadRoute("short_route.json")
+        val routes = listOf(RouteLine(route, null))
+
+        api.setRoutes(routes)
+
+        verify { MapboxRouteLineUtils.resetCache() }
+        unmockkObject(MapboxRouteLineUtils)
+    }
+
+    @Test
     fun setRoutes_doesNotResetVanishingPointWhenSameRoute() = coroutineRule.runBlockingTest {
         val options = MapboxRouteLineOptions.Builder(ctx)
             .withVanishingRouteLineEnabled(true)
@@ -877,6 +891,7 @@ class MapboxRouteLineApiTest {
 
     @Test
     fun clearRouteLine() = coroutineRule.runBlockingTest {
+        mockkObject(MapboxRouteLineUtils)
         val options = MapboxRouteLineOptions.Builder(ctx).build()
         val api = MapboxRouteLineApi(options)
 
@@ -886,6 +901,8 @@ class MapboxRouteLineApiTest {
         assertTrue(result.value!!.alternativeRouteSourceSources[1].features()!!.isEmpty())
         assertTrue(result.value!!.primaryRouteSource.features()!!.isEmpty())
         assertTrue(result.value!!.waypointsSource.features()!!.isEmpty())
+        verify { MapboxRouteLineUtils.resetCache() }
+        unmockkObject(MapboxRouteLineUtils)
     }
 
     @ExperimentalCoroutinesApi
