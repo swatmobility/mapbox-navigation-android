@@ -22,9 +22,9 @@ import com.mapbox.navigation.ui.maps.route.line.model.RouteLineExpressionProvide
 import com.mapbox.navigation.ui.maps.route.line.model.RouteLineUpdateValue
 import com.mapbox.navigation.ui.maps.route.line.model.RouteSetValue
 import com.mapbox.navigation.utils.internal.InternalJobControlFactory
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -516,22 +516,21 @@ class MapboxRouteLineView(var options: MapboxRouteLineOptions) {
         }
     }
 
-    private suspend fun updateLineGradientAsync(
+    private fun updateLineGradientAsync(
         coroutineScope: CoroutineScope,
         style: Style,
         layerId: String,
         expressionProvider: RouteLineExpressionProvider?
     ) {
-        if (expressionProvider != null) {
-            val gradientExpression = coroutineScope.async {
-                expressionProvider.generateExpression()
-            }
-            gradientExpression.await().apply {
-                updateLineGradient(
-                    style,
-                    layerId,
-                    this
-                )
+        ifNonNull(expressionProvider) { provider ->
+            coroutineScope.launch {
+                provider.generateExpression().apply {
+                    updateLineGradient(
+                        style,
+                        layerId,
+                        this
+                    )
+                }
             }
         }
     }
