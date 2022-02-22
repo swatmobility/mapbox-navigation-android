@@ -9,4 +9,6 @@ class NavigationUIBinders(
     val speedLimit: UIBinder = SpeedLimitViewBinder(),
     val maneuver: UIBinder = ManeuverViewBinder(),
     val roadName: UIBinder = RoadNameViewBinder(),
+    val infoPanelHeaderBinder: UIBinder? = null,
+    val infoPanelContentBinder: UIBinder? = null
 )
