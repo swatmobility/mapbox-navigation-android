@@ -11,6 +11,7 @@ import com.mapbox.navigation.dropin.component.recenter.RecenterButtonBehaviour
 import com.mapbox.navigation.dropin.component.replay.ReplayComponent
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioBehavior
+import com.mapbox.navigation.dropin.lifecycle.UICommandDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -27,12 +28,13 @@ internal class DropInNavigationViewModel : ViewModel() {
     /**
      * These classes are accessible through MapboxNavigationApp.getObserver(..)
      */
+    val commandDispatcher = UICommandDispatcher()
     val replayComponent = ReplayComponent()
     val audioGuidanceComponent = MapboxAudioBehavior()
     val locationBehavior = LocationBehavior()
     val recenterBehavior = RecenterButtonBehaviour(cameraState, locationBehavior)
     val cameraModeBehavior = CameraModeButtonBehaviour(cameraState)
-    val routesViewModel = RoutesViewModel()
+    val routesViewModel = RoutesViewModel(commandDispatcher)
     val navigationObservers = listOf(
         replayComponent,
         audioGuidanceComponent,

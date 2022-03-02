@@ -11,35 +11,38 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.lifecycle.UICommand
+import com.mapbox.navigation.dropin.lifecycle.UICommandDispatcher
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
-
-sealed class RoutesAction {
-    data class FetchPoints(val points: List<Point>) : RoutesAction()
-    data class FetchOptions(val options: RouteOptions) : RoutesAction()
-    data class SetRoutes(val routes: List<NavigationRoute>, val legIndex: Int = 0) : RoutesAction()
-}
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
+internal class RoutesViewModel(
+    val commandDispatcher: UICommandDispatcher
+) : UIViewModel() {
     private var routeRequestId: Long? = null
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
-        state: Unit,
-        action: RoutesAction
-    ) {
-        when (action) {
-            is RoutesAction.FetchPoints -> {
-                val routeOptions = getDefaultOptions(mapboxNavigation, action.points)
-                fetchRoute(routeOptions, mapboxNavigation)
-            }
-            is RoutesAction.FetchOptions -> {
-                fetchRoute(action.options, mapboxNavigation)
-            }
-            is RoutesAction.SetRoutes -> {
-                mapboxNavigation.setNavigationRoutes(action.routes, action.legIndex)
+    override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        mainJobControl.scope.launch {
+            commandDispatcher.commandFlow.filterIsInstance<UICommand.RoutesCommand>().collect {
+                when (it) {
+                    is UICommand.RoutesCommand.FetchPoints -> {
+                        val routeOptions = getDefaultOptions(mapboxNavigation, it.points)
+                        fetchRoute(routeOptions, mapboxNavigation)
+                    }
+                    is UICommand.RoutesCommand.FetchOptions -> {
+                        fetchRoute(it.options, mapboxNavigation)
+                    }
+                    is UICommand.RoutesCommand.SetRoutes -> {
+                        mapboxNavigation.setNavigationRoutes(it.routes, it.legIndex)
+                    }
+                }
             }
         }
+
+        super.onAttached(mapboxNavigation)
     }
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
@@ -50,6 +53,7 @@ internal class RoutesViewModel : UIViewModel<Unit, RoutesAction>(Unit) {
     }
 
     private fun fetchRoute(options: RouteOptions, mapboxNavigation: MapboxNavigation) {
+
         routeRequestId = mapboxNavigation.requestRoutes(
             options,
             object : NavigationRouterCallback {

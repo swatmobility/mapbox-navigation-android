@@ -28,7 +28,7 @@ internal class GuidanceCoordinator(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
         return combine(
-            flowTripSessionState(), flowRoutesUpdated().map { it.navigationRoutes }
+            flowTripSessionState(), flowRoutesUpdated().map { it.navigationRoutes },
         ) { tripSessionState, routes ->
             tripSessionState == TripSessionState.STARTED && routes.isNotEmpty()
         }.flatMapLatest { showManeuvers ->

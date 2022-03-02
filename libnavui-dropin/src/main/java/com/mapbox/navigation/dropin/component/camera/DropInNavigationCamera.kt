@@ -20,6 +20,8 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.dropin.component.camera.DropInCameraState.CameraUpdateEvent
 import com.mapbox.navigation.dropin.component.location.LocationBehavior
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
+import com.mapbox.navigation.dropin.lifecycle.UICommand
+import com.mapbox.navigation.dropin.lifecycle.UICommandDispatcher
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 class DropInNavigationCamera(
     private val cameraState: DropInCameraState,
     private val mapView: MapView,
+    private val commandDispatcher: UICommandDispatcher,
 ) : UIComponent() {
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
@@ -75,6 +78,16 @@ class DropInNavigationCamera(
             mapView.camera,
             viewportDataSource
         )
+
+        coroutineScope.launch {
+            commandDispatcher.commandFlow.collect {
+                when (it) {
+                    is UICommand.CameraCommand.Recenter -> {
+                        cameraState.setCameraMode(DropInCameraMode.FOLLOWING)
+                    }
+                }
+            }
+        }
 
         check(mapView.viewTreeObserver.isAlive) { "Make sure the map is alive" }
         mapView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)

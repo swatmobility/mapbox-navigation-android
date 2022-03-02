@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.coordinator.ActionListCoordinator
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
@@ -32,6 +31,7 @@ import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachStarted
+import com.mapbox.navigation.dropin.lifecycle.UICommand
 import com.mapbox.navigation.ui.maps.NavigationStyles
 import com.mapbox.navigation.ui.maps.route.arrow.model.RouteArrowOptions
 import com.mapbox.navigation.ui.maps.route.line.model.MapboxRouteLineOptions
@@ -161,8 +161,8 @@ class DropInNavigationView @JvmOverloads constructor(
                     object : LocationEngineCallback<LocationEngineResult> {
                         override fun onSuccess(result: LocationEngineResult?) {
                             ifNonNull(result?.lastLocation) { lastLocation ->
-                                viewModel.routesViewModel.invoke(
-                                    RoutesAction.FetchPoints(
+                                navigationContext.viewModel.commandDispatcher.dispatch(
+                                    UICommand.RoutesCommand.FetchPoints(
                                         listOf(
                                             Point.fromLngLat(
                                                 lastLocation.longitude,
