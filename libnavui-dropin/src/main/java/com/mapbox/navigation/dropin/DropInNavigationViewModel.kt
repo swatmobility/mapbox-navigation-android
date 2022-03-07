@@ -9,13 +9,13 @@ import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioViewModel
-import com.mapbox.navigation.dropin.model.Destination
-import com.mapbox.navigation.utils.internal.logD
+import com.mapbox.navigation.dropin.coordinator.NavigationStateManager
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
@@ -25,9 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class DropInNavigationViewModel : ViewModel() {
     private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
     val navigationState = _navigationState.asStateFlow()
-
-    private val _destination = MutableStateFlow<Destination?>(null)
-    val destination = _destination.asStateFlow()
 
     @Suppress("PropertyName")
     val _activeNavigationStarted = MutableStateFlow(false)
@@ -46,30 +43,25 @@ internal class DropInNavigationViewModel : ViewModel() {
     val replayViewModel = ReplayViewModel()
     val audioGuidanceViewModel = MapboxAudioViewModel()
     val locationViewModel = LocationViewModel()
-    val routesViewModel = RoutesViewModel()
+    val routesViewModel = RoutesViewModel(
+        navigationState,
+        locationViewModel.state
+    )
     val cameraViewModel = CameraViewModel()
-    val navigationObservers = listOf(
+    private val navigationStateManager = NavigationStateManager(
+        routesViewModel.state.map { it.destination },
+        _navigationState,
+        routesViewModel.state.map { it.navigationStarted },
+    )
+    private val navigationObservers = listOf(
         replayViewModel,
         audioGuidanceViewModel,
         locationViewModel,
         routesViewModel,
         cameraViewModel,
+        navigationStateManager
         // TODO can add more mapbox navigation observers here
     )
-
-    fun updateState(state: NavigationState) {
-        if (_navigationState.value == state) return
-
-        logD(
-            this.javaClass.simpleName,
-            "navigationState: ${_navigationState.value} -> $state"
-        )
-        _navigationState.value = state
-    }
-
-    fun updateDestination(destination: Destination?) {
-        _destination.value = destination
-    }
 
     fun onBackPressed() {
         _onBackPressedEvent.tryEmit(Unit)

@@ -25,11 +25,7 @@ internal class ActiveGuidanceMapBinder(
                 navigationViewContext.viewModel.locationViewModel,
                 navigationViewContext.viewModel.cameraViewModel,
             ),
-            MapMarkersComponent(
-                mapView,
-                navigationViewContext.mapAnnotationFactory(),
-                navigationViewContext.viewModel
-            ),
+            MapMarkersComponent(mapView, navigationViewContext),
         )
     }
 }

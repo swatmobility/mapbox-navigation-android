@@ -3,34 +3,33 @@ package com.mapbox.navigation.dropin.component.infopanel
 import androidx.core.view.isVisible
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
-import com.mapbox.navigation.dropin.DropInNavigationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
+import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import com.mapbox.navigation.dropin.usecase.guidance.StartActiveGuidanceUseCase
-import com.mapbox.navigation.dropin.usecase.guidance.StopActiveGuidanceUseCase
-import com.mapbox.navigation.dropin.usecase.route.FetchAndSetRouteUseCase
-import kotlinx.coroutines.launch
+import com.mapbox.navigation.dropin.model.Destination
+import kotlinx.coroutines.flow.StateFlow
 
 internal class InfoPanelHeaderComponent(
     private val binding: MapboxInfoPanelHeaderLayoutBinding,
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
-    private val viewModel: DropInNavigationViewModel
-        get() = context.viewModel
-    private val stopActiveGuidanceUseCase: StopActiveGuidanceUseCase
-        get() = context.stopActiveGuidanceUseCase()
-    private val fetchAndSetRouteUseCase: FetchAndSetRouteUseCase
-        get() = context.fetchAndSetRouteUseCase()
-    private val startActiveGuidanceUseCase: StartActiveGuidanceUseCase
-        get() = context.startActiveGuidanceUseCase()
+    private val navigationState: StateFlow<NavigationState>
+        get() = context.viewModel.navigationState
+    private val routesState: StateFlow<RoutesState>
+        get() = context.routesState
+    private val destination: Destination?
+        get() = routesState.value.destination
+
+    private val dispatch = context.dispatch
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
         // views visibility
-        viewModel.navigationState.observe {
+        navigationState.observe {
             binding.poiName.isVisible = it == NavigationState.FreeDrive
             binding.routePreview.isVisible = it == NavigationState.FreeDrive
             binding.startNavigation.isVisible = it == NavigationState.FreeDrive ||
@@ -43,43 +42,17 @@ internal class InfoPanelHeaderComponent(
         }
 
         binding.routePreview.setOnClickListener {
-            // TODO: dispatch OnPressStartButtonEvent
-            //  and move this logic to the event handler
-            viewModel.destination.value?.also { destination ->
-                coroutineScope.launch {
-                    fetchAndSetRouteUseCase(destination.point)
-                }
+            destination?.also {
+                dispatch(RoutesAction.FetchAndSetRoute)
             }
         }
 
         binding.startNavigation.setOnClickListener {
-            // TODO: dispatch OnPressStartButtonEvent
-            //  and move this logic to the event handler
-            when (viewModel.navigationState.value) {
-                NavigationState.FreeDrive -> {
-                    viewModel.destination.value?.also { destination ->
-                        coroutineScope.launch {
-                            fetchAndSetRouteUseCase(destination.point)
-                            startActiveGuidanceUseCase(Unit)
-                        }
-                    }
-                }
-                NavigationState.RoutePreview -> {
-                    coroutineScope.launch {
-                        startActiveGuidanceUseCase(Unit)
-                    }
-                }
-                else -> Unit
-            }
+            dispatch(RoutesAction.StartNavigation)
         }
 
         binding.endNavigation.setOnClickListener {
-            // TODO: dispatch OnPressEndNavigationButtonEvent
-            //  and move this logic to the event handler
-            coroutineScope.launch {
-                stopActiveGuidanceUseCase(Unit)
-                mapboxNavigation.setRoutes(emptyList())
-            }
+            dispatch(RoutesAction.StopNavigation)
         }
     }
 }

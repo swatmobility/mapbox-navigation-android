@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.routefetch
 
+import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -7,6 +8,7 @@ import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
@@ -15,6 +17,7 @@ import io.mockk.slot
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -30,7 +33,9 @@ class RoutesBehaviorTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
-    private val routesBehavior = RoutesViewModel()
+    private val navState = MutableStateFlow(NavigationState.FreeDrive)
+    private val locState = MutableStateFlow<Location?>(null)
+    private val routesBehavior = RoutesViewModel(navState, locState)
 
     @Before
     fun setUp() {

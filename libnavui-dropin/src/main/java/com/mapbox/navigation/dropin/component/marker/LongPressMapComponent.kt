@@ -4,13 +4,14 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewModel
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
 
 internal class LongPressMapComponent(
     private val mapView: MapView,
-    private val viewModel: DropInNavigationViewModel
+    private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -24,7 +25,7 @@ internal class LongPressMapComponent(
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
-        viewModel.updateDestination(Destination(point))
+        context.dispatch(RoutesAction.SetDestination(Destination(point)))
         false
     }
 }

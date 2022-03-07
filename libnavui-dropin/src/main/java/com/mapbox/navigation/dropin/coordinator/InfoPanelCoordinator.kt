@@ -27,7 +27,7 @@ internal class InfoPanelCoordinator(
     private val guidelineBottom: Guideline
 ) : UICoordinator<ViewGroup>(infoPanel) {
 
-    private val viewModel = context.viewModel
+    private val routesState = context.routesState
     private val behavior = BottomSheetBehavior.from(infoPanel)
 
     init {
@@ -39,7 +39,7 @@ internal class InfoPanelCoordinator(
 
         behavior.addBottomSheetCallback(updateGuideline)
         coroutineScope.launch {
-            viewModel.destination.collect { destination ->
+            routesState.map { it.destination }.collect { destination ->
                 if (destination != null) behavior.collapse()
                 else behavior.hide()
             }

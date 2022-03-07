@@ -23,9 +23,7 @@ import com.mapbox.navigation.dropin.coordinator.BackPressManager
 import com.mapbox.navigation.dropin.coordinator.GuidanceCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.MapCoordinator
-import com.mapbox.navigation.dropin.coordinator.NavigationStateManager
 import com.mapbox.navigation.dropin.coordinator.RoadNameLabelCoordinator
-import com.mapbox.navigation.dropin.coordinator.RouteManager
 import com.mapbox.navigation.dropin.coordinator.SpeedLimitCoordinator
 import com.mapbox.navigation.dropin.databinding.DropInNavigationViewBinding
 import com.mapbox.navigation.dropin.extensions.attachCreated
@@ -133,8 +131,6 @@ class DropInNavigationView @JvmOverloads constructor(
         MapboxNavigationApp.attach(this)
 
         attachCreated(
-            NavigationStateManager(navigationContext),
-            RouteManager(navigationContext),
             BackPressManager(navigationContext)
         )
 

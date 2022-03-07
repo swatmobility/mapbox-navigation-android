@@ -26,15 +26,8 @@ internal class RoutePreviewMapBinder(
                 navigationViewContext.viewModel.locationViewModel,
                 navigationViewContext.viewModel.cameraViewModel,
             ),
-            MapMarkersComponent(
-                mapView,
-                navigationViewContext.mapAnnotationFactory(),
-                navigationViewContext.viewModel
-            ),
-            LongPressMapComponent(
-                mapView,
-                navigationViewContext.viewModel,
-            ),
+            MapMarkersComponent(mapView, navigationViewContext),
+            LongPressMapComponent(mapView, navigationViewContext),
         )
     }
 }

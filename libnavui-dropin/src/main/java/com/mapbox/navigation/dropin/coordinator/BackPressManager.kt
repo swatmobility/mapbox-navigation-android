@@ -2,10 +2,10 @@ package com.mapbox.navigation.dropin.coordinator
 
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
-import com.mapbox.navigation.dropin.DropInNavigationViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
-import com.mapbox.navigation.dropin.usecase.guidance.StopActiveGuidanceUseCase
+import kotlinx.coroutines.flow.map
 
 /**
  * Class that manages onBackPressedCallback enabled state
@@ -15,28 +15,28 @@ internal class BackPressManager(
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
-    private val viewModel: DropInNavigationViewModel = context.viewModel
-    private val stopActiveGuidanceUseCase: StopActiveGuidanceUseCase
-        get() = context.stopActiveGuidanceUseCase()
+    private val routesState = context.routesState
+    private val onBackPressedEvent = context.viewModel.onBackPressedEvent
+    private val navigationState = context.viewModel.navigationState
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        viewModel.destination.observe {
+        routesState.map { it.destination }.observe {
             context.onBackPressedCallback.isEnabled = it != null
         }
 
-        viewModel.onBackPressedEvent.observe {
-            when (viewModel.navigationState.value) {
+        onBackPressedEvent.observe {
+            when (navigationState.value) {
                 NavigationState.FreeDrive -> {
-                    viewModel.updateDestination(null)
+                    context.dispatch(RoutesAction.SetDestination(null))
                 }
                 NavigationState.RoutePreview -> {
-                    mapboxNavigation.setRoutes(emptyList())
+                    context.dispatch(RoutesAction.SetRoutes(emptyList()))
                 }
                 NavigationState.ActiveNavigation,
                 NavigationState.Arrival -> {
-                    stopActiveGuidanceUseCase(Unit)
+                    context.dispatch(RoutesAction.StopNavigation)
                 }
                 else -> Unit
             }

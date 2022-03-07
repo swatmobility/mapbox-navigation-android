@@ -24,14 +24,10 @@ internal class FreeDriveMapBinder(
                 navigationViewContext.viewModel.locationViewModel,
                 navigationViewContext.viewModel.cameraViewModel,
             ),
-            MapMarkersComponent(
-                mapView,
-                navigationViewContext.mapAnnotationFactory(),
-                navigationViewContext.viewModel
-            ),
+            MapMarkersComponent(mapView, navigationViewContext),
             LongPressMapComponent(
                 mapView,
-                navigationViewContext.viewModel,
+                navigationViewContext,
             ),
         )
     }
