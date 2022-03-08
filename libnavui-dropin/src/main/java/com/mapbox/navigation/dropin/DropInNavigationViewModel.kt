@@ -5,6 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateComponent
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.replay.ReplayViewModel
@@ -12,9 +13,7 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.component.sound.MapboxAudioViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * There is a single ViewModel for the navigation view. Use this class to store state that should
@@ -22,10 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class DropInNavigationViewModel : ViewModel() {
-    // Because of cyclic dependency between NavigationViewModel and RoutesViewModel
-    // NavigationState must be store here and injected to both classes.
-    private val sharedNavigationState =
-        MutableStateFlow<NavigationState>(NavigationState.FreeDrive)
 
     private val _onBackPressedEvent = MutableSharedFlow<Unit>(
         replay = 0,
@@ -40,14 +35,16 @@ internal class DropInNavigationViewModel : ViewModel() {
     val replayViewModel = ReplayViewModel()
     val audioGuidanceViewModel = MapboxAudioViewModel()
     val locationViewModel = LocationViewModel()
-    val routesViewModel = RoutesViewModel(
-        sharedNavigationState.asStateFlow(),
-        locationViewModel.state
-    )
+
     val cameraViewModel = CameraViewModel()
-    val navigationStateViewModel = NavigationStateViewModel(
-        sharedNavigationState,
-        routesViewModel.state
+    val navigationStateViewModel = NavigationStateViewModel(NavigationState.FreeDrive)
+    val routesViewModel = RoutesViewModel(
+        navigationStateViewModel,
+        locationViewModel,
+    )
+    val navigationStateComponent = NavigationStateComponent(
+        navigationStateViewModel,
+        routesViewModel
     )
     private val navigationObservers = listOf(
         replayViewModel,
@@ -55,7 +52,8 @@ internal class DropInNavigationViewModel : ViewModel() {
         locationViewModel,
         routesViewModel,
         cameraViewModel,
-        navigationStateViewModel
+        navigationStateViewModel,
+        navigationStateComponent,
         // TODO can add more mapbox navigation observers here
     )
 

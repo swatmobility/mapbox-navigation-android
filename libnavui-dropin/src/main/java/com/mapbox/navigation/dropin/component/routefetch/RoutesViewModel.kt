@@ -1,6 +1,5 @@
 package com.mapbox.navigation.dropin.component.routefetch
 
-import android.location.Location
 import android.util.Log
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -12,16 +11,16 @@ import com.mapbox.navigation.base.route.NavigationRouterCallback
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.location.LocationViewModel
+import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.dropin.model.Destination
-import com.mapbox.navigation.utils.internal.toPoint
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutesViewModel(
-    private val navigationState: StateFlow<NavigationState>,
-    private val locationState: StateFlow<Location?>
+    private val navigationStateViewModel: NavigationStateViewModel,
+    private val locationViewModel: LocationViewModel
 ) : UIViewModel<RoutesState, RoutesAction>(RoutesState.INITIAL_STATE) {
 
     private var routeRequestId: Long? = null
@@ -105,14 +104,14 @@ internal class RoutesViewModel(
         newDestination: Destination?
     ) = oldDestination != newDestination &&
         newDestination != null &&
-        navigationState.value == NavigationState.RoutePreview
+        navigationStateViewModel.state.value == NavigationState.RoutePreview
 
     private fun fetchAndSetRoute(
         mapboxNavigation: MapboxNavigation,
         destination: Destination?,
         cb: (() -> Unit)? = null
     ) {
-        val from = locationState.value?.toPoint()
+        val from = locationViewModel.lastPoint
         val to = destination?.point
         if (from != null && to != null) {
             val routeOptions = getDefaultOptions(mapboxNavigation, listOf(from, to))
