@@ -7,7 +7,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.binder.Binder
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -22,48 +21,32 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 abstract class UICoordinator<T : ViewGroup>(
-    protected val viewGroup: T
+    private val viewGroup: T
 ) : MapboxNavigationObserver {
 
     lateinit var coroutineScope: CoroutineScope
 
-    protected var viewBinder: Binder<T>? = null
-    protected var attachedObserver: MapboxNavigationObserver? = null
-
     @CallSuper
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
+        var attachedObserver: MapboxNavigationObserver? = null
         coroutineScope = MainScope()
 
         coroutineScope.launch {
-            mapboxNavigation.flowViewBinders().collect { binder ->
-                logD(
-                    this.javaClass.simpleName,
-                    "binder: $viewBinder -> $binder"
-                )
+            mapboxNavigation.flowViewBinders().collect { viewBinder ->
                 attachedObserver?.onDetached(mapboxNavigation)
-                viewBinder?.also { unbind(it, viewGroup) }
-
-                attachedObserver = bind(binder, viewGroup)
-                viewBinder = binder
+                attachedObserver = viewBinder.bind(viewGroup)
                 attachedObserver?.onAttached(mapboxNavigation)
             }
+        }.invokeOnCompletion {
+            attachedObserver?.onDetached(mapboxNavigation)
+            viewGroup.removeAllViews()
         }
     }
 
+    @CallSuper
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         coroutineScope.cancel()
-
-        attachedObserver?.onDetached(mapboxNavigation)
-        attachedObserver = null
-        viewBinder?.also { unbind(it, viewGroup) }
-        viewBinder = null
     }
-
-    protected open fun bind(viewBinder: Binder<T>, viewGroup: T): MapboxNavigationObserver =
-        viewBinder.bind(viewGroup)
-
-    protected open fun unbind(viewBinder: Binder<T>, viewGroup: T): Unit =
-        viewBinder.unbind(viewGroup)
 
     /**
      * Create your flowable [UIBinder]. This allows you to use a flowable state to

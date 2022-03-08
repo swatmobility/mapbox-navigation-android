@@ -4,26 +4,37 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
+import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Destination
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 /**
  * Class that manages onBackPressedCallback enabled state
  * and handles onBackPressed event for each NavigationState.
+
+ * It enables/disables onBackPressedCallback when [Destination] is set and moves
+ * [NavigationStateManager] FSM backwards by clearing each source of truth.
+ * ```
+ * (FreeDrive) <- (RoutePreview) <- (ActiveNavigation)
+ *                                  (Arrival)
+ * ```
  */
 internal class BackPressManager(
     private val context: DropInNavigationViewContext
 ) : UIComponent() {
 
-    private val routesState = context.routesState
-    private val onBackPressedEvent = context.viewModel.onBackPressedEvent
-    private val navigationState = context.viewModel.navigationState
+    private val routesState: StateFlow<RoutesState> = context.routesState
+    private val onBackPressedEvent: SharedFlow<Unit> = context.viewModel.onBackPressedEvent
+    private val navigationState: StateFlow<NavigationState> = context.navigationState
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        routesState.map { it.destination }.observe {
-            context.onBackPressedCallback.isEnabled = it != null
+        routesState.map { it.destination }.observe { d: Destination? ->
+            context.onBackPressedCallback.isEnabled = d != null
         }
 
         onBackPressedEvent.observe {
@@ -32,7 +43,7 @@ internal class BackPressManager(
                     context.dispatch(RoutesAction.SetDestination(null))
                 }
                 NavigationState.RoutePreview -> {
-                    context.dispatch(RoutesAction.SetRoutes(emptyList()))
+                    context.dispatch(RoutesAction.SetRoutes(emptyList(), 0))
                 }
                 NavigationState.ActiveNavigation,
                 NavigationState.Arrival -> {

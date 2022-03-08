@@ -1,5 +1,6 @@
 package com.mapbox.navigation.dropin.component.navigationstate
 
+// TODO: move this to .navigation package before removing .navigationstate
 sealed class NavigationState {
     object Empty : NavigationState()
     object FreeDrive : NavigationState()

@@ -23,7 +23,7 @@ internal class MapCoordinator(
 
     // Temporarily flow to wire the map states
     override fun MapboxNavigation.flowViewBinders(): Flow<Binder<MapView>> {
-        return navigationViewContext.viewModel.navigationState.map { navigationState ->
+        return navigationViewContext.navigationState.map { navigationState ->
             when (navigationState) {
                 NavigationState.Empty,
                 NavigationState.FreeDrive -> FreeDriveMapBinder(navigationViewContext)

@@ -17,7 +17,7 @@ internal class InfoPanelHeaderComponent(
 ) : UIComponent() {
 
     private val navigationState: StateFlow<NavigationState>
-        get() = context.viewModel.navigationState
+        get() = context.navigationState
     private val routesState: StateFlow<RoutesState>
         get() = context.routesState
     private val destination: Destination?

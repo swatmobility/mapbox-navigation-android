@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
+import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
@@ -51,6 +52,7 @@ internal class DropInNavigationViewContext(
         }
     }
 
+    val navigationState: StateFlow<NavigationState> get() = viewModel.navigationStateViewModel.state
     val routesState: StateFlow<RoutesState> get() = viewModel.routesViewModel.state
 
     //region Builders & Factories

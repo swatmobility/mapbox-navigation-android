@@ -5,7 +5,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.util.CompositeMapboxNavigationObserver
+import com.mapbox.navigation.dropin.binder.navigationListOf
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class InfoPanelBinder(
@@ -14,14 +14,12 @@ internal class InfoPanelBinder(
 ) : UIBinder {
 
     override fun bind(viewGroup: ViewGroup): MapboxNavigationObserver {
-        return CompositeMapboxNavigationObserver().apply {
-            headerBinder
-                .bind(viewGroup.findViewById(R.id.infoPanelHeader))
-                .also { add(it) }
-
-            contentBinder
-                ?.bind(viewGroup.findViewById(R.id.infoPanelContent))
-                ?.also { add(it) }
+        val binders = mutableListOf(
+            headerBinder.bind(viewGroup.findViewById(R.id.infoPanelHeader))
+        )
+        if (contentBinder != null) {
+            binders.add(contentBinder.bind(viewGroup.findViewById(R.id.infoPanelContent)))
         }
+        return navigationListOf(*binders.toTypedArray())
     }
 }

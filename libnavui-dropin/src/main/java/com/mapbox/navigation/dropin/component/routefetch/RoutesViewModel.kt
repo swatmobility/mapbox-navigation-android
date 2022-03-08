@@ -18,17 +18,6 @@ import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.flow.StateFlow
 
-sealed class RoutesAction {
-    data class SetDestination(val destination: Destination?) : RoutesAction()
-    object FetchAndSetRoute : RoutesAction()
-    object StartNavigation : RoutesAction()
-    object StopNavigation : RoutesAction()
-
-    data class FetchPoints(val points: List<Point>) : RoutesAction()
-    data class FetchOptions(val options: RouteOptions) : RoutesAction()
-    data class SetRoutes(val routes: List<NavigationRoute>, val legIndex: Int = 0) : RoutesAction()
-}
-
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutesViewModel(
     private val navigationState: StateFlow<NavigationState>,

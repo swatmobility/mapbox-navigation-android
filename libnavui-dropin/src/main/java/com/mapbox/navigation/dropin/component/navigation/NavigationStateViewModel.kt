@@ -1,18 +1,18 @@
-package com.mapbox.navigation.dropin.coordinator
+package com.mapbox.navigation.dropin.component.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigationstate.NavigationState
+import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.extensions.flowOnFinalDestinationArrival
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
-import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import com.mapbox.navigation.dropin.model.Destination
-import kotlinx.coroutines.flow.Flow
+import com.mapbox.navigation.utils.internal.logD
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -33,52 +33,62 @@ import kotlinx.coroutines.launch
  *                                       ┗━━━━━━━━━━[ Arrival ]━━━━━━━━━━━━━━━━━┛
  * ```
  */
-internal class NavigationStateManager(
-    private val destinationFlow: Flow<Destination?>,
-    private val navigationState: MutableStateFlow<NavigationState>,
-    private val activeNavigationStarted: Flow<Boolean>
-) : UIComponent() {
+internal class NavigationStateViewModel(
+    mutableState: MutableStateFlow<NavigationState>,
+    private val routesState: StateFlow<RoutesState>
+) : UIViewModel<NavigationState, NavigationStateAction>(mutableState) {
+
+    override fun process(
+        mapboxNavigation: MapboxNavigation,
+        state: NavigationState,
+        action: NavigationStateAction
+    ): NavigationState {
+        return when (action) {
+            is NavigationStateAction.Update -> action.state
+        }
+    }
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        coroutineScope.launch {
-            combine(
-                destinationFlow.stateIn(this),
-                activeNavigationStarted.stateIn(this)
-            ) { destination, started ->
-                getNavigationState(destination, started, mapboxNavigation.getRoutes())
-            }.collect {
-                updateState(it)
+        mainJobControl.scope.launch {
+            routesState.collect {
+                val state = getNavigationState(
+                    it.destination,
+                    it.navigationStarted,
+                    mapboxNavigation.getRoutes()
+                )
+                updateState(state)
             }
         }
 
-        coroutineScope.launch {
-            val destination = destinationFlow.stateIn(this)
-            val started = activeNavigationStarted.stateIn(this)
+        mainJobControl.scope.launch {
             mapboxNavigation.flowRoutesUpdated().collect {
                 val state = getNavigationState(
-                    destination.value,
-                    started.value,
+                    routesState.value.destination,
+                    routesState.value.navigationStarted,
                     it.routes
                 )
                 updateState(state)
             }
         }
 
-        mapboxNavigation.flowOnFinalDestinationArrival().observe {
-            val inActiveNav =
-                navigationState.value == NavigationState.ActiveNavigation
-            val arrived = it.currentState == RouteProgressState.COMPLETE
-            if (inActiveNav && arrived) {
-                updateState(NavigationState.Arrival)
+        mainJobControl.scope.launch {
+            mapboxNavigation.flowOnFinalDestinationArrival().collect {
+                val inActiveNav =
+                    state.value == NavigationState.ActiveNavigation
+                val arrived = it.currentState == RouteProgressState.COMPLETE
+                if (inActiveNav && arrived) {
+                    updateState(NavigationState.Arrival)
+                }
             }
         }
     }
 
     private fun updateState(state: NavigationState) {
-        if (navigationState.value != state) {
-            navigationState.value = state
+        if (this.state.value != state) {
+            logD(TAG, "updateState ${this.state.value} -> $state")
+            invoke(NavigationStateAction.Update(state))
         }
     }
 
@@ -89,7 +99,7 @@ internal class NavigationStateManager(
     ): NavigationState {
         return if (destination != null) {
             if (routes.isNotEmpty()) {
-                val inArrivalState = navigationState.value == NavigationState.Arrival
+                val inArrivalState = state.value == NavigationState.Arrival
                 when {
                     inArrivalState && activeNavigationStarted -> NavigationState.Arrival
                     activeNavigationStarted -> NavigationState.ActiveNavigation
@@ -101,5 +111,9 @@ internal class NavigationStateManager(
         } else {
             NavigationState.FreeDrive
         }
+    }
+
+    companion object {
+        private val TAG = NavigationStateViewModel::class.java.simpleName
     }
 }

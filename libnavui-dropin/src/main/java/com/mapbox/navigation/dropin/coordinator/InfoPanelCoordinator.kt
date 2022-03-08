@@ -48,7 +48,7 @@ internal class InfoPanelCoordinator(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        BottomSheetBehavior.from(viewGroup).removeBottomSheetCallback(updateGuideline)
+        behavior.removeBottomSheetCallback(updateGuideline)
     }
 
     override fun MapboxNavigation.flowViewBinders(): Flow<UIBinder> {
@@ -72,13 +72,13 @@ internal class InfoPanelCoordinator(
 
     private val updateGuideline = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
-            guidelineBottom.setGuidelineEnd(offsetBottom())
+            guidelineBottom.setGuidelineEnd(offsetBottom(bottomSheet))
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            guidelineBottom.setGuidelineEnd(offsetBottom())
+            guidelineBottom.setGuidelineEnd(offsetBottom(bottomSheet))
         }
 
-        private fun offsetBottom() = (viewGroup.parent as ViewGroup).height - viewGroup.top
+        private fun offsetBottom(v: View) = (v.parent as ViewGroup).height - v.top
     }
 }

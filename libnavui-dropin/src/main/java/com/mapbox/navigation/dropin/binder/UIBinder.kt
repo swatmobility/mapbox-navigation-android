@@ -2,8 +2,8 @@ package com.mapbox.navigation.dropin.binder
 
 import android.view.ViewGroup
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
-import com.mapbox.navigation.dropin.util.CompositeMapboxNavigationObserver
 
 /**
  * This interface works with the [UICoordinator]. Implementations of this class represent
@@ -18,8 +18,6 @@ interface Binder<T> {
      * [MapboxNavigationObserver] which gives this view a simple lifecycle.
      */
     fun bind(value: T): MapboxNavigationObserver
-
-    fun unbind(value: T) = Unit
 }
 
 /**
@@ -36,4 +34,12 @@ interface UIBinder : Binder<ViewGroup>
  */
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal fun <T : MapboxNavigationObserver> navigationListOf(vararg elements: T) =
-    CompositeMapboxNavigationObserver(*elements)
+    object : MapboxNavigationObserver {
+        override fun onAttached(mapboxNavigation: MapboxNavigation) {
+            elements.forEach { it.onAttached(mapboxNavigation) }
+        }
+
+        override fun onDetached(mapboxNavigation: MapboxNavigation) {
+            elements.reversed().forEach { it.onDetached(mapboxNavigation) }
+        }
+    }
