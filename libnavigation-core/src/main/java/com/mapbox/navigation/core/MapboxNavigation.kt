@@ -55,8 +55,11 @@ import com.mapbox.navigation.core.internal.utils.isInternalImplementation
 import com.mapbox.navigation.core.internal.utils.paramsProvider
 import com.mapbox.navigation.core.navigator.TilesetDescriptorFactory
 import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.reroute.DisabledRerouteControllerInterface
 import com.mapbox.navigation.core.reroute.LegacyRerouteControllerAdapter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
+import com.mapbox.navigation.core.reroute.MapboxRerouteControllerFacade
+import com.mapbox.navigation.core.reroute.NativeRerouteControllerWrapper
 import com.mapbox.navigation.core.reroute.NavigationRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteOptionsAdapter
@@ -114,6 +117,7 @@ import com.mapbox.navigator.FallbackVersionsObserver
 import com.mapbox.navigator.IncidentsOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.PollingConfig
+import com.mapbox.navigator.RerouteControllerInterface
 import com.mapbox.navigator.RouterInterface
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -228,7 +232,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
         Channel(Channel.CONFLATED)
     )
     private val internalRoutesObserver: RoutesObserver
-    private val internalOffRouteObserver: OffRouteObserver
     private val internalFallbackVersionsObserver: FallbackVersionsObserver
     private val routeAlternativesController: RouteAlternativesController
     private val routeRefreshController: RouteRefreshController
@@ -303,7 +306,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
      * Reroute controller, by default uses [defaultRerouteController].
      */
     private var rerouteController: NavigationRerouteController?
-    private val defaultRerouteController: NavigationRerouteController
+    private var defaultRerouteController: NavigationRerouteController
+    private val disabledRerouteControllerInterface: RerouteControllerInterface by lazy {
+        DisabledRerouteControllerInterface()
+    }
 
     /**
      * [NavigationVersionSwitchObserver] is notified when navigation switches tiles version.
@@ -497,19 +503,28 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             threadController,
         )
 
-        defaultRerouteController = MapboxRerouteController(
-            directionsSession,
-            tripSession,
-            routeOptionsProvider,
-            navigationOptions.rerouteOptions,
-            threadController,
+        val nativeRerouteController = navigator.getRerouteControllerInterface()
+        val nativeRerouteControllerWrapper = NativeRerouteControllerWrapper(
+            accessToken,
+            nativeRerouteController
         )
+        navigator.setRerouteControllerInterface(nativeRerouteControllerWrapper)
+        defaultRerouteController = MapboxRerouteControllerFacade(
+            nativeRerouteControllerWrapper,
+            navigator,
+        )
+
+//        defaultRerouteController = MapboxRerouteController(
+//            directionsSession,
+//            tripSession,
+//            routeOptionsProvider,
+//            navigationOptions.rerouteOptions,
+//            threadController,
+//        )
         rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
-        internalOffRouteObserver = createInternalOffRouteObserver()
         internalFallbackVersionsObserver = createInternalFallbackVersionsObserver()
-        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerFallbackVersionsObserver(internalFallbackVersionsObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
 
@@ -1044,15 +1059,14 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     /**
      * Set [RerouteController] that's automatically invoked when user is off-route.
      *
-     * By default uses [MapboxRerouteController].
+     * By default uses [MapboxRerouteControllerFacade].
      */
     fun setRerouteController(rerouteController: RerouteController) {
-        val currentController = this.rerouteController
-        this.rerouteController = LegacyRerouteControllerAdapter(rerouteController)
-
-        if (currentController?.state == RerouteState.FetchingRoute) {
-            currentController.interrupt()
-            reroute()
+        LegacyRerouteControllerAdapter(rerouteController).also { legacyRerouteAdapter ->
+            this.rerouteController = legacyRerouteAdapter
+            navigator.setRerouteControllerInterface(
+                RerouteControllerAdapter(accessToken, legacyRerouteAdapter)
+            )
         }
     }
 
@@ -1064,11 +1078,10 @@ class MapboxNavigation @VisibleForTesting internal constructor(
     fun setRerouteController(
         rerouteController: NavigationRerouteController? = defaultRerouteController
     ) {
-        this.rerouteController = rerouteController
-        if (rerouteController?.state == RerouteState.FetchingRoute) {
-            rerouteController.interrupt()
-            reroute()
+        if (rerouteController == null){
+            navigator.setRerouteControllerInterface(disabledRerouteControllerInterface)
         }
+        this.rerouteController = rerouteController
     }
 
     /**
@@ -1400,12 +1413,6 @@ class MapboxNavigation @VisibleForTesting internal constructor(
             routeRefreshController.restart(result.navigationRoutes.first())
         } else {
             routeRefreshController.stop()
-        }
-    }
-
-    private fun createInternalOffRouteObserver() = OffRouteObserver { offRoute ->
-        if (offRoute) {
-            reroute()
         }
     }
 
