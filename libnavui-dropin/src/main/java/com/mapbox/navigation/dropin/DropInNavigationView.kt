@@ -20,6 +20,7 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.backpress.OnKeyListenerComponent
 import com.mapbox.navigation.dropin.component.tripsession.LocationPermissionComponent
+import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
 import com.mapbox.navigation.dropin.coordinator.ActionButtonsCoordinator
 import com.mapbox.navigation.dropin.coordinator.InfoPanelCoordinator
 import com.mapbox.navigation.dropin.coordinator.ManeuverCoordinator
@@ -70,6 +71,16 @@ class DropInNavigationView @JvmOverloads constructor(
         viewModel = viewModel,
     )
 
+    var isReplayEnabled: Boolean
+        get() = viewModel.store.state.value.tripSession.isReplayEnabled
+        set(value) {
+            if (value) {
+                viewModel.store.dispatch(TripSessionStarterAction.EnableReplayTripSession)
+            } else {
+                viewModel.store.dispatch(TripSessionStarterAction.EnableTripSession)
+            }
+        }
+
     /**
      * Customize the views by implementing your own [UIBinder] components.
      */
@@ -114,17 +125,9 @@ class DropInNavigationView @JvmOverloads constructor(
          * Single point of entry for the Mapbox Navigation View.
          */
         attachCreated(
-            LocationPermissionComponent(
-                context.toComponentActivityRef(),
-                navigationContext.viewModel.tripSessionStarterViewModel
-            ),
+            LocationPermissionComponent(context.toComponentActivityRef(), navigationContext),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(
-                navigationContext.viewModel.navigationStateViewModel,
-                navigationContext.viewModel.destinationViewModel,
-                navigationContext.viewModel.routesViewModel,
-                this,
-            ),
+            OnKeyListenerComponent(navigationContext, this),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,

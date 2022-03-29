@@ -7,6 +7,7 @@ import com.mapbox.common.Logger
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.testing.MockLoggerRule
 import io.mockk.Runs
@@ -14,12 +15,14 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -32,18 +35,16 @@ class LocationViewModelTest {
     @get:Rule
     val mockLoggerTestRule = MockLoggerRule()
 
-    @Test
-    fun `default state is a null location`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+    private lateinit var testStore: TestStore
 
-        val location = locationViewModel.state.value
-
-        assertNull(location)
+    @Before
+    fun setUp() {
+        testStore = spyk(TestStore(coroutineRule.coroutineScope))
     }
 
     @Test
     fun `onAttached will use current location to update state`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+        val locationViewModel = LocationViewModel(testStore)
         val mapboxNavigation = mockMapboxNavigationLastLocation(
             mockk {
                 every { longitude } returns -109.587335
@@ -53,7 +54,7 @@ class LocationViewModelTest {
 
         locationViewModel.onAttached(mapboxNavigation)
 
-        with(locationViewModel.state.value!!) {
+        with(testStore.state.value.location!!) {
             assertEquals(-109.587335, longitude, 0.00001)
             assertEquals(38.731370, latitude, 0.00001)
         }
@@ -62,7 +63,7 @@ class LocationViewModelTest {
     @Test
     fun `onAttached will use current location to update navigationLocationProvider`() =
         runBlockingTest {
-            val locationViewModel = LocationViewModel()
+            val locationViewModel = LocationViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigationLastLocation(
                 mockk {
                     every { longitude } returns -109.587335
@@ -80,7 +81,7 @@ class LocationViewModelTest {
 
     @Test
     fun `onAttached will use current location to update lastPoint`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+        val locationViewModel = LocationViewModel(testStore)
         val mapboxNavigation = mockMapboxNavigationLastLocation(
             mockk {
                 every { longitude } returns -109.587335
@@ -98,7 +99,7 @@ class LocationViewModelTest {
 
     @Test
     fun `onAttached will not log error when getLastLocation fails`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+        val locationViewModel = LocationViewModel(testStore)
         val callbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
             every { navigationOptions } returns mockk {
@@ -112,13 +113,13 @@ class LocationViewModelTest {
 
         locationViewModel.onAttached(mapboxNavigation)
 
-        assertNull(locationViewModel.state.value)
+        assertNull(testStore.state.value.location)
         verify(exactly = 1) { Logger.e(any(), any()) }
     }
 
     @Test
     fun `onAttached registerLocationObserver onNewRawLocation are ignored`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+        val locationViewModel = LocationViewModel(testStore)
         val locationObserver = slot<LocationObserver>()
         val mapboxNavigation = mockk<MapboxNavigation>(relaxed = true) {
             every { navigationOptions } returns mockk {
@@ -138,13 +139,13 @@ class LocationViewModelTest {
 
         locationViewModel.onAttached(mapboxNavigation)
 
-        assertNull(locationViewModel.state.value)
+        assertNull(testStore.state.value.location)
     }
 
     @Test
     fun `onAttached registerLocationObserver onNewLocationMatcherResult updates state`() =
         runBlockingTest {
-            val locationViewModel = LocationViewModel()
+            val locationViewModel = LocationViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigationRegisterObserver(
                 mockk {
                     every { longitude } returns -109.587335
@@ -154,7 +155,7 @@ class LocationViewModelTest {
 
             locationViewModel.onAttached(mapboxNavigation)
 
-            with(locationViewModel.state.value!!) {
+            with(testStore.state.value.location!!) {
                 assertEquals(-109.587335, longitude, 0.00001)
                 assertEquals(38.731370, latitude, 0.00001)
             }
@@ -163,7 +164,7 @@ class LocationViewModelTest {
     @Test
     fun `onAttached registerLocationObserver onNewLocationMatcherResult updates navigationLocationProvider`() =
         runBlockingTest {
-            val locationViewModel = LocationViewModel()
+            val locationViewModel = LocationViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigationRegisterObserver(
                 mockk {
                     every { longitude } returns -109.587335
@@ -182,7 +183,7 @@ class LocationViewModelTest {
     @Test
     fun `onAttached registerLocationObserver onNewLocationMatcherResult updates lastPoint`() =
         runBlockingTest {
-            val locationViewModel = LocationViewModel()
+            val locationViewModel = LocationViewModel(testStore)
             val mapboxNavigation = mockMapboxNavigationRegisterObserver(
                 mockk {
                     every { longitude } returns -109.587335
@@ -200,7 +201,7 @@ class LocationViewModelTest {
 
     @Test
     fun `onDetached will unregisterLocationObserver`() = runBlockingTest {
-        val locationViewModel = LocationViewModel()
+        val locationViewModel = LocationViewModel(testStore)
         val mapboxNavigation = mockMapboxNavigationRegisterObserver(
             mockk {
                 every { longitude } returns -109.587335

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.dropin.component.navigation
 
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
+import com.mapbox.navigation.dropin.util.TestStore
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,19 +16,22 @@ internal class NavigationStateViewModelTest {
     @get:Rule
     var coroutineRule = MainCoroutineRule()
 
+    private lateinit var testStore: TestStore
+
     lateinit var sut: NavigationStateViewModel
 
     @Before
     fun setUp() {
-        sut = NavigationStateViewModel(NavigationState.FreeDrive)
+        testStore = TestStore(coroutineRule.coroutineScope)
+        sut = NavigationStateViewModel(testStore)
     }
 
     @Test
     fun `should set new state on Update action`() = coroutineRule.runBlockingTest {
         sut.onAttached(mockk())
 
-        sut.invoke(NavigationStateAction.Update(NavigationState.RoutePreview))
+        testStore.dispatch(NavigationStateAction.Update(NavigationState.RoutePreview))
 
-        assertEquals(NavigationState.RoutePreview, sut.state.value)
+        assertEquals(NavigationState.RoutePreview, testStore.state.value.navigation)
     }
 }

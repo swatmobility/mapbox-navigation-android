@@ -7,16 +7,18 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class LocationComponent(
+internal class LocationComponent(
+    context: DropInNavigationViewContext,
     private val mapView: MapView,
-    private val locationViewModel: LocationViewModel
 ) : UIComponent() {
+    private val locationViewModel: LocationViewModel = context.viewModel.locationViewModel
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

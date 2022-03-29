@@ -3,28 +3,26 @@ package com.mapbox.navigation.dropin.component.cameramode
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraAction
-import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonComponent(
-    private val cameraViewModel: CameraViewModel,
-    private val navigationStateViewModel: NavigationStateViewModel,
+    context: DropInNavigationViewContext,
     private val cameraModeButton: MapboxCameraModeButton,
 ) : UIComponent() {
-
+    private val store = context.viewModel.store
     private var buttonIconState: TargetCameraMode = TargetCameraMode.Idle
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
 
-        cameraViewModel.state.observe {
+        store.select { it.camera }.observe {
             when (it.cameraMode) {
                 TargetCameraMode.Following -> {
                     buttonIconState = TargetCameraMode.Overview
@@ -40,33 +38,25 @@ internal class CameraModeButtonComponent(
             }
         }
 
-        navigationStateViewModel.state.observe {
+        store.select { it.navigation }.observe {
             cameraModeButton.isVisible = it != NavigationState.RoutePreview
         }
 
         cameraModeButton.setOnClickListener {
-            when (cameraViewModel.state.value.cameraMode) {
+            when (store.state.value.camera.cameraMode) {
                 TargetCameraMode.Following -> {
-                    cameraViewModel.invoke(
-                        CameraAction.ToOverview
-                    )
+                    store.dispatch(CameraAction.ToOverview)
                 }
                 TargetCameraMode.Overview -> {
-                    cameraViewModel.invoke(
-                        CameraAction.ToFollowing
-                    )
+                    store.dispatch(CameraAction.ToFollowing)
                 }
                 else -> {
                     when (buttonIconState) {
                         TargetCameraMode.Overview -> {
-                            cameraViewModel.invoke(
-                                CameraAction.ToOverview
-                            )
+                            store.dispatch(CameraAction.ToOverview)
                         }
                         TargetCameraMode.Following -> {
-                            cameraViewModel.invoke(
-                                CameraAction.ToFollowing
-                            )
+                            store.dispatch(CameraAction.ToFollowing)
                         }
                         else -> {
                             // no op

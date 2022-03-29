@@ -3,33 +3,40 @@ package com.mapbox.navigation.dropin.component.audioguidance
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton
 import com.mapbox.navigation.dropin.view.MapboxExtendableButton.State
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class AudioGuidanceButtonComponent(
-    private val audioGuidanceViewModel: AudioGuidanceViewModel,
-    private val navigationStateViewModel: NavigationStateViewModel,
+    context: DropInNavigationViewContext,
     private val soundButton: MapboxExtendableButton,
 ) : UIComponent() {
+    private val store = context.viewModel.store
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        audioGuidanceViewModel.state.observe {
-            if (it.isMuted) soundButton.setState(MUTED)
-            else soundButton.setState(UN_MUTED)
+
+        coroutineScope.launch {
+            store.select { it.audio }.collect {
+                if (it.isMuted) soundButton.setState(MUTED)
+                else soundButton.setState(UN_MUTED)
+            }
         }
 
-        navigationStateViewModel.state.observe {
-            soundButton.isVisible = it == NavigationState.ActiveNavigation
+        coroutineScope.launch {
+            store.select { it.navigation }.collect {
+                soundButton.isVisible = it == NavigationState.ActiveNavigation
+            }
         }
 
         soundButton.setOnClickListener {
-            audioGuidanceViewModel.invoke(AudioAction.Toggle)
+            store.dispatch(AudioAction.Toggle)
         }
     }
 

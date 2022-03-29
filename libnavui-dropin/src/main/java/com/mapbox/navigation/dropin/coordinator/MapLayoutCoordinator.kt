@@ -37,7 +37,7 @@ internal class MapLayoutCoordinator(
 ) : UICoordinator<ViewGroup>(binding.mapViewLayout) {
 
     private val viewGroup = binding.mapViewLayout
-    private val navigationStateViewModel = navigationViewContext.viewModel.navigationStateViewModel
+    private val store = navigationViewContext.viewModel.store
     private val mapStyleLoader = navigationViewContext.mapStyleLoader
     private var reloadStyleJob: Job? = null
 
@@ -66,7 +66,7 @@ internal class MapLayoutCoordinator(
                     mapViewOverride
                 }
             }
-            .combine(navigationStateViewModel.state) { mapView, navigationState ->
+            .combine(store.select { it.navigation }) { mapView, navigationState ->
                 MapBinder(
                     navigationViewContext,
                     binding,
@@ -105,12 +105,10 @@ private class MapBinder(
             .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_v).toDouble()
         private val hPadding = resources
             .getDimensionPixelSize(R.dimen.mapbox_camera_overview_padding_h).toDouble()
-        private val cameraViewModel = navigationViewContext.viewModel.cameraViewModel
-        private val navigationStateViewModel =
-            navigationViewContext.viewModel.navigationStateViewModel
+        private val store = navigationViewContext.viewModel.store
 
         private val layoutListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            cameraViewModel.invoke(CameraAction.UpdatePadding(getOverlayEdgeInsets()))
+            store.dispatch(CameraAction.UpdatePadding(getOverlayEdgeInsets()))
         }
 
         override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -124,7 +122,7 @@ private class MapBinder(
         }
 
         private fun getOverlayEdgeInsets(): EdgeInsets {
-            return when (navigationStateViewModel.state.value) {
+            return when (store.state.value.navigation) {
                 is NavigationState.DestinationPreview,
                 is NavigationState.FreeDrive,
                 is NavigationState.RoutePreview -> {

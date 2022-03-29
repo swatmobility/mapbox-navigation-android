@@ -16,41 +16,22 @@ import com.mapbox.navigation.dropin.lifecycle.reloadOnChange
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RoutePreviewMapBinder(
-    private val navigationViewContext: DropInNavigationViewContext,
+    private val context: DropInNavigationViewContext,
 ) : Binder<MapView> {
 
-    override fun bind(value: MapView): MapboxNavigationObserver {
+    override fun bind(mapView: MapView): MapboxNavigationObserver {
         return navigationListOf(
-            LocationComponent(
-                value,
-                navigationViewContext.viewModel.locationViewModel,
-            ),
+            LocationComponent(context, mapView),
             reloadOnChange(
-                navigationViewContext.mapStyleLoader.loadedMapStyle,
-                navigationViewContext.options.routeLineOptions
+                context.mapStyleLoader.loadedMapStyle,
+                context.options.routeLineOptions
             ) { _, lineOptions ->
-                RouteLineComponent(
-                    value,
-                    lineOptions,
-                    navigationViewContext.viewModel.routesViewModel
-                )
+                RouteLineComponent(context, mapView, lineOptions)
             },
-            CameraComponent(
-                value,
-                navigationViewContext.viewModel.cameraViewModel,
-                navigationViewContext.viewModel.locationViewModel,
-                navigationViewContext.viewModel.navigationStateViewModel,
-            ),
-            MapMarkersComponent(value, navigationViewContext),
-            RoutePreviewLongPressMapComponent(
-                value,
-                navigationViewContext.viewModel.locationViewModel,
-                navigationViewContext.viewModel.routesViewModel,
-                navigationViewContext.viewModel.destinationViewModel,
-            ),
-            GeocodingComponent(
-                navigationViewContext.viewModel.destinationViewModel
-            )
+            CameraComponent(context, mapView),
+            MapMarkersComponent(context, mapView),
+            RoutePreviewLongPressMapComponent(context, mapView),
+            GeocodingComponent(context)
         )
     }
 }

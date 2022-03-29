@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.launch
@@ -22,8 +23,10 @@ import java.lang.ref.WeakReference
  */
 internal class LocationPermissionComponent(
     private val componentActivityRef: WeakReference<ComponentActivity>?,
-    private val tripSessionStarterViewModel: TripSessionStarterViewModel,
+    context: DropInNavigationViewContext
 ) : UIComponent() {
+
+    private val store = context.viewModel.store
 
     private val callback = ActivityResultCallback { permissions: Map<String, Boolean> ->
         val accessFineLocation = permissions[FINE_LOCATION_PERMISSIONS]
@@ -31,9 +34,7 @@ internal class LocationPermissionComponent(
         val accessCoarseLocation = permissions[COARSE_LOCATION_PERMISSIONS]
             ?: false
         val granted = accessFineLocation || accessCoarseLocation
-        tripSessionStarterViewModel.invoke(
-            TripSessionStarterAction.OnLocationPermission(granted)
-        )
+        store.dispatch(TripSessionStarterAction.OnLocationPermission(granted))
     }
 
     private val launcher = try {
@@ -56,9 +57,7 @@ internal class LocationPermissionComponent(
             mapboxNavigation.navigationOptions.applicationContext
         )
         if (isGranted) {
-            tripSessionStarterViewModel.invoke(
-                TripSessionStarterAction.OnLocationPermission(true)
-            )
+            store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
         } else {
             launcher?.launch(LOCATION_PERMISSIONS)
 
@@ -74,14 +73,12 @@ internal class LocationPermissionComponent(
     private fun notifyGrantedOnForegrounded(applicationContext: Context) {
         coroutineScope.launch {
             componentActivityRef?.get()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                if (!tripSessionStarterViewModel.state.value.isLocationPermissionGranted) {
+                if (!store.state.value.tripSession.isLocationPermissionGranted) {
                     val isGranted = PermissionsManager.areLocationPermissionsGranted(
                         applicationContext
                     )
                     if (isGranted) {
-                        tripSessionStarterViewModel.invoke(
-                            TripSessionStarterAction.OnLocationPermission(true)
-                        )
+                        store.dispatch(TripSessionStarterAction.OnLocationPermission(true))
                     }
                 }
             }

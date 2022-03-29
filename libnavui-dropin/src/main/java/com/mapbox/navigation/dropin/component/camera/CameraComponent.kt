@@ -5,9 +5,8 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
@@ -20,15 +19,12 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraComponent constructor(
+    context: DropInNavigationViewContext,
     private val mapView: MapView,
-    private val cameraViewModel: CameraViewModel,
-    private val locationViewModel: LocationViewModel,
-    private val navigationStateViewModel: NavigationStateViewModel,
     private val viewportDataSource: MapboxNavigationViewportDataSource =
         MapboxNavigationViewportDataSource(
             mapboxMap = mapView.getMapboxMap()
@@ -40,6 +36,7 @@ internal class CameraComponent constructor(
             viewportDataSource = viewportDataSource
         ),
 ) : UIComponent() {
+    private val store = context.viewModel.store
 
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
 
@@ -65,10 +62,12 @@ internal class CameraComponent constructor(
 
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
 
-        cameraViewModel.state.map { it.cameraPadding }.observe {
-            viewportDataSource.overviewPadding = it
-            viewportDataSource.followingPadding = it
-            viewportDataSource.evaluate()
+        coroutineScope.launch {
+            store.select { it.camera.cameraPadding }.collect {
+                viewportDataSource.overviewPadding = it
+                viewportDataSource.followingPadding = it
+                viewportDataSource.evaluate()
+            }
         }
 
         controlCameraFrameOverrides()
@@ -86,7 +85,7 @@ internal class CameraComponent constructor(
 
     private fun controlCameraFrameOverrides() {
         coroutineScope.launch {
-            navigationStateViewModel.state.collect {
+            store.select { it.navigation }.collect {
                 when (it) {
                     is NavigationState.FreeDrive -> {
                         viewportDataSource.followingZoomPropertyOverride(FOLLOWING_ZOOM_OVERRIDE)
@@ -104,7 +103,7 @@ internal class CameraComponent constructor(
 
     private fun updateCameraFrame() {
         coroutineScope.launch {
-            cameraViewModel.state.collect { state ->
+            store.select { it.camera }.collect { state ->
                 if (state.isCameraInitialized) {
                     if (!isFirstAttached) {
                         requestCameraModeTo(cameraMode = state.cameraMode)
@@ -119,9 +118,9 @@ internal class CameraComponent constructor(
     private fun updateCameraLocation() {
         coroutineScope.launch {
             combine(
-                cameraViewModel.state,
-                locationViewModel.state,
-                navigationStateViewModel.state
+                store.select { it.camera },
+                store.select { it.location },
+                store.select { it.navigation }
             ) { cameraState, location, navigationState ->
                 location?.let {
                     viewportDataSource.onLocationChanged(it)
@@ -136,7 +135,7 @@ internal class CameraComponent constructor(
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                cameraViewModel.invoke(
+                                store.dispatch(
                                     CameraAction.InitializeCamera(TargetCameraMode.Following)
                                 )
                             }
@@ -147,7 +146,7 @@ internal class CameraComponent constructor(
                                         .maxDuration(0) // instant transition
                                         .build()
                                 )
-                                cameraViewModel.invoke(
+                                store.dispatch(
                                     CameraAction.InitializeCamera(TargetCameraMode.Overview)
                                 )
                             }
@@ -163,7 +162,7 @@ internal class CameraComponent constructor(
             navigationCamera.flowNavigationCameraState().collect {
                 when (it) {
                     NavigationCameraState.IDLE -> {
-                        cameraViewModel.invoke(CameraAction.ToIdle)
+                        store.dispatch(CameraAction.ToIdle)
                     }
                     else -> {
                         // no op
@@ -186,7 +185,7 @@ internal class CameraComponent constructor(
         coroutineScope.launch {
             combine(
                 mapboxNavigation.flowRoutesUpdated(),
-                navigationStateViewModel.state
+                store.select { it.navigation }
             ) { routeUpdate, navigationState ->
                 if (routeUpdate.navigationRoutes.isNotEmpty()) {
                     viewportDataSource.onRouteChanged(routeUpdate.navigationRoutes.first())
@@ -194,10 +193,10 @@ internal class CameraComponent constructor(
                     when (navigationState) {
                         NavigationState.ActiveNavigation,
                         NavigationState.Arrival -> {
-                            cameraViewModel.invoke(CameraAction.ToFollowing)
+                            store.dispatch(CameraAction.ToFollowing)
                         }
                         else -> {
-                            cameraViewModel.invoke(CameraAction.ToOverview)
+                            store.dispatch(CameraAction.ToOverview)
                         }
                     }
                 } else {

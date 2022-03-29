@@ -8,20 +8,30 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.extensions.flowLocationMatcherResult
-import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Action
+import com.mapbox.navigation.dropin.model.Reducer
+import com.mapbox.navigation.dropin.model.State
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.maps.location.NavigationLocationProvider
 import com.mapbox.navigation.utils.internal.logE
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-sealed class LocationAction {
+sealed class LocationAction : Action {
     data class Update(val location: Location) : LocationAction()
 }
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
+internal class LocationViewModel(
+    private val store: Store
+) : UIComponent(), Reducer {
+    init {
+        store.register(this)
+    }
+
     val navigationLocationProvider = NavigationLocationProvider()
 
     /**
@@ -44,11 +54,17 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
         return nonNullLocation
     }
 
-    override fun process(
-        mapboxNavigation: MapboxNavigation,
+    override fun process(state: State, action: Action): State {
+        if (action is LocationAction) {
+            return state.copy(location = processLocationAction(state.location, action))
+        }
+        return state
+    }
+
+    private fun processLocationAction(
         state: Location?,
         action: LocationAction
-    ): Location {
+    ): Location? {
         return when (action) {
             is LocationAction.Update -> action.location
         }
@@ -61,9 +77,10 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
             override fun onSuccess(result: LocationEngineResult) {
                 result.lastLocation?.let {
                     navigationLocationProvider.changePosition(it, emptyList())
-                    invoke(LocationAction.Update(it))
+                    store.dispatch(LocationAction.Update(it))
                 }
             }
+
             override fun onFailure(exception: Exception) {
                 logE(
                     "Failed to get immediate location exception=$exception",
@@ -72,13 +89,13 @@ class LocationViewModel : UIViewModel<Location?, LocationAction>(null) {
             }
         })
 
-        mainJobControl.scope.launch {
+        coroutineScope.launch {
             mapboxNavigation.flowLocationMatcherResult().collect { locationMatcherResult ->
                 navigationLocationProvider.changePosition(
                     location = locationMatcherResult.enhancedLocation,
                     keyPoints = locationMatcherResult.keyPoints,
                 )
-                invoke(LocationAction.Update(locationMatcherResult.enhancedLocation))
+                store.dispatch(LocationAction.Update(locationMatcherResult.enhancedLocation))
             }
         }
     }

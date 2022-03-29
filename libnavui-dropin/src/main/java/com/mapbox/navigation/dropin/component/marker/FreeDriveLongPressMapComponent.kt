@@ -4,23 +4,20 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.dropin.util.HapticFeedback
 
 internal class FreeDriveLongPressMapComponent(
+    context: DropInNavigationViewContext,
     private val mapView: MapView,
-    private val navigationStateViewModel: NavigationStateViewModel,
-    private val routesViewModel: RoutesViewModel,
-    private val destinationViewModel: DestinationViewModel,
 ) : UIComponent() {
+    private val store = context.viewModel.store
 
     private var hapticFeedback: HapticFeedback? = null
 
@@ -38,13 +35,13 @@ internal class FreeDriveLongPressMapComponent(
     }
 
     private val longClickListener = OnMapLongClickListener { point ->
-        destinationViewModel.invoke(
+        store.dispatch(
             DestinationAction.SetDestination(Destination(point))
         )
-        routesViewModel.invoke(
+        store.dispatch(
             RoutesAction.SetRoutes(emptyList())
         )
-        navigationStateViewModel.invoke(
+        store.dispatch(
             NavigationStateAction.Update(NavigationState.DestinationPreview)
         )
         hapticFeedback?.tick()

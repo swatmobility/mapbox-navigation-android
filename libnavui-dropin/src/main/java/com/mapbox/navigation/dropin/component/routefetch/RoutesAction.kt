@@ -5,8 +5,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.RouterFailure
 import com.mapbox.navigation.base.route.RouterOrigin
+import com.mapbox.navigation.dropin.model.Action
 
-sealed class RoutesAction {
+sealed class RoutesAction : Action {
     data class FetchPoints(val points: List<Point>) : RoutesAction()
     data class FetchOptions(val options: RouteOptions) : RoutesAction()
     data class SetRoutes(val routes: List<NavigationRoute>) : RoutesAction()

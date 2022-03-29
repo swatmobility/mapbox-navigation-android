@@ -29,13 +29,7 @@ internal class InfoPanelHeaderBinder(
 
         val binding = MapboxInfoPanelHeaderLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelHeaderComponent(
-                binding,
-                context.viewModel.navigationStateViewModel,
-                context.viewModel.destinationViewModel,
-                context.viewModel.locationViewModel,
-                context.viewModel.routesViewModel,
-            ),
+            InfoPanelHeaderComponent(context, binding),
             tripProgressBinder.bind(binding.tripProgressLayout),
         )
     }

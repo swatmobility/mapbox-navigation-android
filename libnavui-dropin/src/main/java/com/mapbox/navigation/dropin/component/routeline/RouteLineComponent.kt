@@ -10,8 +10,8 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListen
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
@@ -30,13 +30,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
 internal class RouteLineComponent(
+    context: DropInNavigationViewContext,
     private val mapView: MapView,
     private val options: MapboxRouteLineOptions,
-    private val routesViewModel: RoutesViewModel,
     private val routeLineApi: MapboxRouteLineApi = MapboxRouteLineApi(options),
     private val routeLineView: MapboxRouteLineView = MapboxRouteLineView(options)
 ) : UIComponent() {
-
+    private val store = context.viewModel.store
     private val routeClickPadding = Utils.dpToPx(30f)
 
     private val onMapClickListener = OnMapClickListener { point ->
@@ -114,7 +114,7 @@ internal class RouteLineComponent(
                         .also {
                             it.add(0, resultValue.navigationRoute)
                         }
-                    routesViewModel.invoke(
+                    store.dispatch(
                         RoutesAction.SetRoutes(reOrderedRoutes)
                     )
                 }

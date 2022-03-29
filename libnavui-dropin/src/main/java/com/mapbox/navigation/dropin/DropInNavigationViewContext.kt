@@ -5,10 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
-import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
-import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.lifecycle.UICoordinator
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache
 import com.mapbox.navigation.dropin.util.BitmapMemoryCache.Companion.MB_IN_BYTES
@@ -32,15 +29,6 @@ internal class DropInNavigationViewContext(
 
     val uiBinders = NavigationUIBinders()
     val options = NavigationViewOptions(context)
-
-    val dispatch: (action: Any) -> Unit = { action ->
-        when (action) {
-            is RoutesAction -> viewModel.routesViewModel.invoke(action)
-            is DestinationAction -> viewModel.destinationViewModel.invoke(action)
-        }
-    }
-
-    val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
     val mapStyleLoader = MapStyleLoader(context, options)
 

@@ -2,33 +2,29 @@ package com.mapbox.navigation.dropin.component.infopanel
 
 import androidx.core.view.isVisible
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
-import com.mapbox.navigation.dropin.component.destination.DestinationViewModel
-import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
-import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
-import com.mapbox.navigation.dropin.component.routefetch.RoutesViewModel
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
+import com.mapbox.navigation.utils.internal.toPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class InfoPanelHeaderComponent(
+    context: DropInNavigationViewContext,
     private val binding: MapboxInfoPanelHeaderLayoutBinding,
-    private val navigationStateViewModel: NavigationStateViewModel,
-    private val destinationViewModel: DestinationViewModel,
-    private val locationViewModel: LocationViewModel,
-    private val routesViewModel: RoutesViewModel,
 ) : UIComponent() {
+    private val store = context.viewModel.store
 
     private val resources get() = binding.root.resources
 
@@ -36,7 +32,7 @@ internal class InfoPanelHeaderComponent(
         super.onAttached(mapboxNavigation)
 
         // views visibility
-        navigationStateViewModel.state.observe {
+        store.select { it.navigation }.observe {
             binding.poiName.isVisible = it == NavigationState.DestinationPreview
             binding.routePreview.isVisible = it == NavigationState.DestinationPreview
             binding.startNavigation.isVisible = it == NavigationState.DestinationPreview ||
@@ -48,8 +44,8 @@ internal class InfoPanelHeaderComponent(
             binding.arrivedText.isVisible = it == NavigationState.Arrival
         }
 
-        destinationViewModel.state.observe {
-            val placeName = it.destination?.features?.firstOrNull()?.placeName()
+        store.select { it.destination }.observe {
+            val placeName = it?.features?.firstOrNull()?.placeName()
             binding.poiName.text = placeName
                 ?: resources.getString(R.string.mapbox_drop_in_dropped_pin)
         }
@@ -63,27 +59,23 @@ internal class InfoPanelHeaderComponent(
         }
 
         binding.endNavigation.setOnClickListener {
-            routesViewModel.invoke(RoutesAction.SetRoutes(emptyList()))
-            destinationViewModel.invoke(DestinationAction.SetDestination(null))
-            navigationStateViewModel.invoke(
-                NavigationStateAction.Update(NavigationState.FreeDrive)
-            )
+            store.dispatch(RoutesAction.SetRoutes(emptyList()))
+            store.dispatch(DestinationAction.SetDestination(null))
+            store.dispatch(NavigationStateAction.Update(NavigationState.FreeDrive))
         }
     }
 
     private fun updateNavigationStateWhenRouteIsReady(navigationState: NavigationState) {
         ifNonNull(
-            locationViewModel.lastPoint,
-            destinationViewModel.state.value.destination
+            store.state.value.location?.toPoint(),
+            store.state.value.destination
         ) { lastPoint, destination ->
-            routesViewModel.invoke(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
+            store.dispatch(RoutesAction.FetchPoints(listOf(lastPoint, destination.point)))
             coroutineScope.launch {
                 // Wait for fetching to complete and then take action
                 val isRouteReady = waitForFetched()
                 if (isActive && isRouteReady) {
-                    navigationStateViewModel.invoke(
-                        NavigationStateAction.Update(navigationState)
-                    )
+                    store.dispatch(NavigationStateAction.Update(navigationState))
                 } else {
                     logW(TAG, "Routes are not ready")
                 }
@@ -92,8 +84,8 @@ internal class InfoPanelHeaderComponent(
     }
 
     private suspend fun waitForFetched(): Boolean {
-        routesViewModel.state.takeWhile { it is RoutesState.Fetching }.collect()
-        return routesViewModel.state.value is RoutesState.Ready
+        store.select { it.routes }.takeWhile { it is RoutesState.Fetching }.collect()
+        return store.state.value.routes is RoutesState.Ready
     }
 
     private companion object {
