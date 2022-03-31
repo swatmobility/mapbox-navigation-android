@@ -4,7 +4,6 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraState
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -39,23 +38,14 @@ class CameraModeButtonComponentTest {
     private val mockMapboxNavigation: MapboxNavigation = mockk(relaxed = true)
 
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     private lateinit var cameraModeButtonComponent: CameraModeButtonComponent
 
     @Before
     fun setUp() {
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
 
-        cameraModeButtonComponent = CameraModeButtonComponent(
-            navContext,
-            mockCameraModeButton
-        )
+        cameraModeButtonComponent = CameraModeButtonComponent(testStore, mockCameraModeButton)
     }
 
     @Test

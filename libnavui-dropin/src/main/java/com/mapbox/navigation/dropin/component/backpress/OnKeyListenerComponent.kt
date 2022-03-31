@@ -4,12 +4,12 @@ import android.view.KeyEvent
 import android.view.View
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.DropInNavigationView
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 
 /**
  * Key listener for the [DropInNavigationView].
@@ -20,10 +20,9 @@ import com.mapbox.navigation.dropin.lifecycle.UIComponent
  *             <- (Arrival)
  */
 internal class OnKeyListenerComponent(
-    context: DropInNavigationViewContext,
+    private val store: Store,
     private val view: View,
 ) : UIComponent() {
-    private val store = context.viewModel.store
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

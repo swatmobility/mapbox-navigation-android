@@ -19,16 +19,17 @@ internal class ActiveGuidanceMapBinder(
 ) : Binder<MapView> {
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
+        val store = context.viewModel.store
         return navigationListOf(
-            LocationComponent(context, mapView),
+            LocationComponent(context.viewModel.locationViewModel, mapView),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeLineOptions
             ) { _, lineOptions ->
-                RouteLineComponent(context, mapView, lineOptions)
+                RouteLineComponent(store, mapView, lineOptions)
             },
-            CameraComponent(context, mapView),
-            MapMarkersComponent(context, mapView),
+            CameraComponent(store, mapView),
+            MapMarkersComponent(store, mapView),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeArrowOptions

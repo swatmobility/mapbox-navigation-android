@@ -4,20 +4,19 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.dropin.model.Destination
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.HapticFeedback
 import com.mapbox.navigation.utils.internal.logW
 import com.mapbox.navigation.utils.internal.toPoint
 
 internal class RoutePreviewLongPressMapComponent(
-    context: DropInNavigationViewContext,
+    private val store: Store,
     private val mapView: MapView,
 ) : UIComponent() {
-    private val store = context.viewModel.store
 
     private var hapticFeedback: HapticFeedback? = null
 

@@ -7,7 +7,6 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
@@ -48,23 +47,14 @@ internal class FreeDriveLongPressMapComponentTest {
 
     lateinit var sut: FreeDriveLongPressMapComponent
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     @Before
     fun setUp() {
         mockkObject(HapticFeedback)
         every { HapticFeedback.create(any()) } returns mockk(relaxed = true)
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
 
-        sut = FreeDriveLongPressMapComponent(
-            navContext,
-            mockMapView,
-        )
+        sut = FreeDriveLongPressMapComponent(testStore, mockMapView)
     }
 
     @After

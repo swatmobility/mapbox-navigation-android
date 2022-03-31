@@ -27,11 +27,12 @@ internal class ActionButtonBinder(
         )
         TransitionManager.go(scene, Slide(Gravity.RIGHT))
 
+        val store = context.viewModel.store
         val binding = MapboxActionButtonsLayoutBinding.bind(value)
         return navigationListOf(
-            AudioGuidanceButtonComponent(context, binding.soundButton),
-            CameraModeButtonComponent(context, binding.cameraModeButton),
-            RecenterButtonComponent(context, binding.recenterButton)
+            AudioGuidanceButtonComponent(store, binding.soundButton),
+            CameraModeButtonComponent(store, binding.cameraModeButton),
+            RecenterButtonComponent(store, binding.recenterButton)
         )
     }
 }

@@ -2,7 +2,6 @@ package com.mapbox.navigation.dropin.component.infopanel
 
 import androidx.core.view.isVisible
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.R
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -11,6 +10,7 @@ import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesState
 import com.mapbox.navigation.dropin.databinding.MapboxInfoPanelHeaderLayoutBinding
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.logE
 import com.mapbox.navigation.utils.internal.logW
@@ -21,10 +21,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class InfoPanelHeaderComponent(
-    context: DropInNavigationViewContext,
+    private val store: Store,
     private val binding: MapboxInfoPanelHeaderLayoutBinding,
 ) : UIComponent() {
-    private val store = context.viewModel.store
 
     private val resources get() = binding.root.resources
 

@@ -127,7 +127,7 @@ class DropInNavigationView @JvmOverloads constructor(
         attachCreated(
             LocationPermissionComponent(context.toComponentActivityRef(), navigationContext),
             MapLayoutCoordinator(navigationContext, binding),
-            OnKeyListenerComponent(navigationContext, this),
+            OnKeyListenerComponent(viewModel.store, this),
             ManeuverCoordinator(navigationContext, binding.guidanceLayout),
             InfoPanelCoordinator(
                 navigationContext,

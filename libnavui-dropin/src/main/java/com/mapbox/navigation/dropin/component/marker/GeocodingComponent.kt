@@ -2,9 +2,9 @@ package com.mapbox.navigation.dropin.component.marker
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.util.Geocoder
 import com.mapbox.navigation.utils.internal.logW
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.mapNotNull
  * UIComponent that observes and reverse geocodes Destination.
  */
 internal class GeocodingComponent(
-    context: DropInNavigationViewContext,
+    private val store: Store,
 ) : UIComponent() {
-    private val store = context.viewModel.store
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

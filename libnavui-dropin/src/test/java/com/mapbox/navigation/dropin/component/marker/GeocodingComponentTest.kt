@@ -4,7 +4,6 @@ import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction.DidReverseGeocode
 import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.dropin.model.State
@@ -42,7 +41,6 @@ internal class GeocodingComponentTest {
     lateinit var mockNavigation: MapboxNavigation
 
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     @Before
     fun setUp() {
@@ -50,16 +48,11 @@ internal class GeocodingComponentTest {
         mockkObject(Geocoder)
         every { Geocoder.create(any()) } returns mockGeocoder
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
         every { mockNavigation.navigationOptions } returns mockk {
             every { accessToken } returns "ACCESS_TOKEN"
         }
 
-        sut = GeocodingComponent(navContext)
+        sut = GeocodingComponent(testStore)
     }
 
     @After

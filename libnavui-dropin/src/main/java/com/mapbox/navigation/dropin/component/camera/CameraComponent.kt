@@ -5,12 +5,12 @@ import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.extensions.flowNavigationCameraState
 import com.mapbox.navigation.dropin.extensions.flowRouteProgress
 import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
 import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
 internal class CameraComponent constructor(
-    context: DropInNavigationViewContext,
+    private val store: Store,
     private val mapView: MapView,
     private val viewportDataSource: MapboxNavigationViewportDataSource =
         MapboxNavigationViewportDataSource(
@@ -36,7 +36,6 @@ internal class CameraComponent constructor(
             viewportDataSource = viewportDataSource
         ),
 ) : UIComponent() {
-    private val store = context.viewModel.store
 
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
 

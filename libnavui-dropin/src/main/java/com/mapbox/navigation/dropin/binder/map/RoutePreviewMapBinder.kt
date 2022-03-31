@@ -20,18 +20,19 @@ internal class RoutePreviewMapBinder(
 ) : Binder<MapView> {
 
     override fun bind(mapView: MapView): MapboxNavigationObserver {
+        val store = context.viewModel.store
         return navigationListOf(
-            LocationComponent(context, mapView),
+            LocationComponent(context.viewModel.locationViewModel, mapView),
             reloadOnChange(
                 context.mapStyleLoader.loadedMapStyle,
                 context.options.routeLineOptions
             ) { _, lineOptions ->
-                RouteLineComponent(context, mapView, lineOptions)
+                RouteLineComponent(store, mapView, lineOptions)
             },
-            CameraComponent(context, mapView),
-            MapMarkersComponent(context, mapView),
-            RoutePreviewLongPressMapComponent(context, mapView),
-            GeocodingComponent(context)
+            CameraComponent(store, mapView),
+            MapMarkersComponent(store, mapView),
+            RoutePreviewLongPressMapComponent(store, mapView),
+            GeocodingComponent(store)
         )
     }
 }

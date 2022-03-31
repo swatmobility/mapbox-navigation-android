@@ -27,9 +27,10 @@ internal class InfoPanelHeaderBinder(
         )
         TransitionManager.go(scene)
 
+        val store = context.viewModel.store
         val binding = MapboxInfoPanelHeaderLayoutBinding.bind(viewGroup)
         return navigationListOf(
-            InfoPanelHeaderComponent(context, binding),
+            InfoPanelHeaderComponent(store, binding),
             tripProgressBinder.bind(binding.tripProgressLayout),
         )
     }

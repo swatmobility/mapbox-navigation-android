@@ -7,7 +7,6 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.model.Destination
 import com.mapbox.navigation.dropin.model.State
 import com.mapbox.navigation.dropin.util.TestStore
@@ -16,8 +15,11 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -37,26 +39,27 @@ internal class MapMarkersComponentTest {
     lateinit var mockAnnotationManager: PointAnnotationManager
 
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     @Before
     fun setUp() {
+        mockkObject(MapMarkerFactory)
         MockKAnnotations.init(this, relaxUnitFun = true)
-        testStore = TestStore(coroutineRule.coroutineScope)
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-            every { mapAnnotationFactory() } returns mockAnnotationFactory
-        }
+        every { MapMarkerFactory.create(any()) } returns mockAnnotationFactory
 
+        testStore = TestStore(coroutineRule.coroutineScope)
         val mapView = mockk<MapView> {
+            every { context } returns mockk(relaxed = true)
             every { annotations } returns mockk {
                 every { createPointAnnotationManager() } returns mockAnnotationManager
             }
         }
 
-        sut = MapMarkersComponent(navContext, mapView)
+        sut = MapMarkersComponent(testStore, mapView)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(MapMarkerFactory)
     }
 
     @Test

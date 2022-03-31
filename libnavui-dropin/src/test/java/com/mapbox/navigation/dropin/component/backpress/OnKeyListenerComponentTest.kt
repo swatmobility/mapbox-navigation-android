@@ -5,7 +5,6 @@ import android.view.View
 import com.mapbox.android.gestures.Utils
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
@@ -40,7 +39,6 @@ class OnKeyListenerComponentTest {
     }
 
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     private lateinit var onKeyListenerComponent: OnKeyListenerComponent
 
@@ -48,13 +46,8 @@ class OnKeyListenerComponentTest {
     fun setUp() {
         mockkStatic(Utils::class)
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
 
-        onKeyListenerComponent = OnKeyListenerComponent(navContext, view)
+        onKeyListenerComponent = OnKeyListenerComponent(testStore, view)
     }
 
     @Test

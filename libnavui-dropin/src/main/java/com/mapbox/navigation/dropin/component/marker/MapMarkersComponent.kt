@@ -4,18 +4,20 @@ import com.mapbox.maps.MapView
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 
 /**
  * Component for rendering all drop-in UI map markers.
  */
 internal open class MapMarkersComponent(
-    protected val context: DropInNavigationViewContext,
+    private val store: Store,
     protected val mapView: MapView,
 ) : UIComponent() {
-    private val store = context.viewModel.store
-    private val mapAnnotationFactory = context.mapAnnotationFactory()
+
+    private val mapMarkerFactory by lazy {
+        MapMarkerFactory.create(mapView.context)
+    }
     private var annotationManager = mapView.annotations.createPointAnnotationManager()
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
@@ -25,7 +27,7 @@ internal open class MapMarkersComponent(
             .observe { point ->
                 annotationManager.deleteAll()
                 if (point != null) {
-                    val annotation = mapAnnotationFactory.createPin(point)
+                    val annotation = mapMarkerFactory.createPin(point)
                     annotationManager.create(annotation)
                 }
             }

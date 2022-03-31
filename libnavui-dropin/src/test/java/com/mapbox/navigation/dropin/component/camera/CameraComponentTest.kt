@@ -12,7 +12,6 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesUpdatedResult
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.model.State
@@ -68,21 +67,15 @@ class CameraComponentTest {
     private lateinit var cameraViewModel: CameraViewModel
 
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     @Before
     fun setUp() {
         mockkStatic(Utils::class)
         every { Utils.dpToPx(any()) } returns 50f
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
         cameraViewModel = CameraViewModel(testStore)
         cameraComponent = CameraComponent(
-            navContext,
+            testStore,
             mockMapView,
             mockViewPortDataSource,
             mockNavigationCamera,

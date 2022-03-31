@@ -3,20 +3,20 @@ package com.mapbox.navigation.dropin.component.cameramode
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraAction
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
+import com.mapbox.navigation.dropin.model.Store
 import com.mapbox.navigation.dropin.view.MapboxCameraModeButton
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 
 @ExperimentalPreviewMapboxNavigationAPI
 internal class CameraModeButtonComponent(
-    context: DropInNavigationViewContext,
+    private val store: Store,
     private val cameraModeButton: MapboxCameraModeButton,
 ) : UIComponent() {
-    private val store = context.viewModel.store
+
     private var buttonIconState: TargetCameraMode = TargetCameraMode.Idle
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {

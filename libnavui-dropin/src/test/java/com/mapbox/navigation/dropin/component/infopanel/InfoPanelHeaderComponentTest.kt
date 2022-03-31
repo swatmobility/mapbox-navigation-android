@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateAction
 import com.mapbox.navigation.dropin.component.routefetch.RoutesAction
@@ -45,18 +44,12 @@ internal class InfoPanelHeaderComponentTest {
 
     private lateinit var binding: MapboxInfoPanelHeaderLayoutBinding
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     private lateinit var sut: InfoPanelHeaderComponent
 
     @Before
     fun setup() {
         testStore = spyk(TestStore(coroutineRule.coroutineScope))
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
 
         val context: Context = ApplicationProvider.getApplicationContext()
         binding = MapboxInfoPanelHeaderLayoutBinding.inflate(
@@ -64,10 +57,7 @@ internal class InfoPanelHeaderComponentTest {
             FrameLayout(context)
         )
 
-        sut = InfoPanelHeaderComponent(
-            navContext,
-            binding,
-        )
+        sut = InfoPanelHeaderComponent(testStore, binding)
     }
 
     @Test

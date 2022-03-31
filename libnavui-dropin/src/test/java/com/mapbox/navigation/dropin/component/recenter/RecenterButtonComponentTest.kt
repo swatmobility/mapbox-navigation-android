@@ -4,7 +4,6 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.dropin.DropInNavigationViewContext
 import com.mapbox.navigation.dropin.component.camera.CameraState
 import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
@@ -38,18 +37,13 @@ class RecenterButtonComponentTest {
 
     private lateinit var recenterButtonComponent: RecenterButtonComponent
     private lateinit var testStore: TestStore
-    private lateinit var navContext: DropInNavigationViewContext
 
     @Before
     fun setUp() {
         testStore = TestStore(coroutineRule.coroutineScope)
-        navContext = mockk(relaxed = true) {
-            every { viewModel } returns mockk {
-                every { store } returns testStore
-            }
-        }
+
         recenterButtonComponent = RecenterButtonComponent(
-            navContext,
+            testStore,
             mockRecenterButton
         )
     }
