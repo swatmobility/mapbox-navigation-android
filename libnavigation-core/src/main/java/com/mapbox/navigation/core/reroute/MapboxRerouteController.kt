@@ -94,11 +94,9 @@ internal class MapboxRerouteController(
     }
 
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
-        reroute(
-            NavigationRerouteController.RoutesCallback { routes, _ ->
-                routesCallback.onNewRoutes(routes.toDirectionsRoutes())
-            }
-        )
+        reroute { routes, _ ->
+            routesCallback.onNewRoutes(routes.toDirectionsRoutes())
+        }
     }
 
     override fun reroute(callback: NavigationRerouteController.RoutesCallback) {
