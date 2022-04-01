@@ -1,5 +1,6 @@
 package com.mapbox.navigation.qa_test_app.car
 
+import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -14,6 +15,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.extension.androidauto.DefaultMapboxCarMapGestureHandler
 import com.mapbox.maps.extension.androidauto.MapboxCarMap
+import com.mapbox.navigation.dropin.component.camera.CameraAction
+import com.mapbox.navigation.dropin.component.camera.CameraViewModel
 import com.mapbox.navigation.qa_test_app.R
 
 /**
@@ -21,10 +24,10 @@ import com.mapbox.navigation.qa_test_app.R
  */
 @OptIn(MapboxExperimental::class)
 class MapScreen(
-  val mapboxCarMap: MapboxCarMap
-) : Screen(mapboxCarMap.carContext) {
+  carContext: CarContext,
+  private val cameraViewModel: CameraViewModel
+) : Screen(carContext) {
   private var isInPanMode: Boolean = false
-  private val carCameraController = CarCameraController()
 
   override fun onGetTemplate(): Template {
     val builder = NavigationTemplate.Builder()
@@ -43,7 +46,8 @@ class MapScreen(
               ).build()
             )
             .setOnClickListener {
-              carCameraController.focusOnLocationPuck()
+                // Recenter button
+                cameraViewModel.invoke(CameraAction.ToFollowing)
             }
             .build()
         )
@@ -77,8 +81,8 @@ class MapScreen(
               ).build()
             )
             .setOnClickListener {
-              // handle zoom out
-              carCameraController.zoomOutAction()
+                // TODO Add zoom out action
+//                cameraViewModel.invoke(CameraAction.ToFollowing)
             }
             .build()
         )
@@ -93,7 +97,8 @@ class MapScreen(
               ).build()
             )
             .setOnClickListener {
-              carCameraController.zoomInAction()
+                // TODO Add zoom in action
+//                cameraViewModel.invoke(CameraAction.ToFollowing)
             }
             .build()
         )
@@ -115,19 +120,5 @@ class MapScreen(
     }
 
     return builder.build()
-  }
-
-  init {
-    lifecycle.addObserver(object : DefaultLifecycleObserver {
-      override fun onCreate(owner: LifecycleOwner) {
-        mapboxCarMap.registerObserver(carCameraController)
-        mapboxCarMap.setGestureHandler(carCameraController.gestureHandler)
-      }
-
-      override fun onDestroy(owner: LifecycleOwner) {
-        mapboxCarMap.setGestureHandler(DefaultMapboxCarMapGestureHandler())
-        mapboxCarMap.unregisterObserver(carCameraController)
-      }
-    })
   }
 }

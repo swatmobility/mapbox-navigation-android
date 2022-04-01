@@ -5,7 +5,7 @@ import com.mapbox.navigation.dropin.lifecycle.UIViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class DestinationViewModel(
+class DestinationViewModel(
     initialState: DestinationState = DestinationState()
 ) : UIViewModel<DestinationState, DestinationAction>(initialState) {
 

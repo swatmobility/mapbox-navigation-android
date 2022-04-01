@@ -6,6 +6,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
 import com.mapbox.navigation.dropin.lifecycle.UIViewModel
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -56,6 +57,7 @@ class TripSessionStarterViewModel(
 
         mainJobControl.scope.launch {
             flowStartReplaySession().collect { starterState ->
+                logI("TripSessionStarterViewModel process $starterState", "kyle_debug")
                 if (!starterState.isLocationPermissionGranted) {
                     mapboxNavigation.stopTripSession()
                 } else if (starterState.isReplayEnabled) {

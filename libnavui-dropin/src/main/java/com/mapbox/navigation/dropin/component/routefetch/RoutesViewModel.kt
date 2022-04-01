@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPreviewMapboxNavigationAPI::class)
-internal class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesState.Empty) {
+class RoutesViewModel : UIViewModel<RoutesState, RoutesAction>(RoutesState.Empty) {
 
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)

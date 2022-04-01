@@ -30,6 +30,7 @@ import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
+import com.mapbox.navigation.dropin.DropInNavigation
 import com.mapbox.navigation.dropin.ViewOptionsCustomization.Companion.defaultRouteLineOptions
 import com.mapbox.navigation.dropin.binder.UIBinder
 import com.mapbox.navigation.dropin.component.tripsession.TripSessionStarterAction
@@ -146,8 +147,8 @@ class MapboxNavigationViewCustomizedActivity : AppCompatActivity() {
         // before we can interact with the view models, we will probably prefer something like this:
         //       binding.navigationView.api.enableReplay();
         // TODO Make a ticket with link to list of public api needs
-        val tripSessionStarterViewModel = MapboxNavigationApp
-            .getObserver(TripSessionStarterViewModel::class)
+        val tripSessionStarterViewModel = DropInNavigation.getInstance()
+            .tripSessionStarterViewModel
         binding.toggleReplay.isChecked = tripSessionStarterViewModel.state.value.isReplayEnabled
         binding.toggleReplay.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {

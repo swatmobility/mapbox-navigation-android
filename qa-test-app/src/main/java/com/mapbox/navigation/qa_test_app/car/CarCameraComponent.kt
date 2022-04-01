@@ -1,10 +1,14 @@
-package com.mapbox.navigation.dropin.component.camera
+package com.mapbox.navigation.qa_test_app.car
 
-import com.mapbox.maps.MapView
 import com.mapbox.maps.MapboxExperimental
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.plugin.delegates.MapPluginProviderDelegate
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.dropin.component.camera.CameraAction
+import com.mapbox.navigation.dropin.component.camera.CameraViewModel
+import com.mapbox.navigation.dropin.component.camera.TargetCameraMode
 import com.mapbox.navigation.dropin.component.location.LocationViewModel
 import com.mapbox.navigation.dropin.component.navigation.NavigationState
 import com.mapbox.navigation.dropin.component.navigation.NavigationStateViewModel
@@ -14,29 +18,28 @@ import com.mapbox.navigation.dropin.extensions.flowRoutesUpdated
 import com.mapbox.navigation.dropin.lifecycle.UIComponent
 import com.mapbox.navigation.ui.maps.camera.NavigationCamera
 import com.mapbox.navigation.ui.maps.camera.data.MapboxNavigationViewportDataSource
-import com.mapbox.navigation.ui.maps.camera.data.debugger.MapboxNavigationViewportDataSourceDebugger
 import com.mapbox.navigation.ui.maps.camera.lifecycle.NavigationBasicGesturesHandler
 import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
+import com.mapbox.navigation.utils.internal.logI
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(MapboxExperimental::class, ExperimentalPreviewMapboxNavigationAPI::class)
-class CameraComponent constructor(
-    private val mapView: MapView,
+class CarCameraComponent constructor(
+    private val mapboxMap: MapboxMap,
+    private val mapPluginProvider: MapPluginProviderDelegate,
     private val cameraViewModel: CameraViewModel,
     private val locationViewModel: LocationViewModel,
     private val navigationStateViewModel: NavigationStateViewModel,
     private val viewportDataSource: MapboxNavigationViewportDataSource =
-        MapboxNavigationViewportDataSource(
-            mapboxMap = mapView.getMapboxMap()
-        ),
+        MapboxNavigationViewportDataSource(mapboxMap = mapboxMap),
     private val navigationCamera: NavigationCamera =
         NavigationCamera(
-            mapboxMap = mapView.getMapboxMap(),
-            cameraPlugin = mapView.camera,
+            mapboxMap = mapboxMap,
+            cameraPlugin = mapPluginProvider.camera,
             viewportDataSource = viewportDataSource
         ),
 ) : UIComponent() {
@@ -44,24 +47,10 @@ class CameraComponent constructor(
     private var isCameraInitialized = false
     private val gesturesHandler = NavigationBasicGesturesHandler(navigationCamera)
 
-    private val debug = false
-    private val debugger by lazy {
-        MapboxNavigationViewportDataSourceDebugger(
-            context = mapView.context,
-            mapView = mapView,
-            layerAbove = "road-label"
-        )
-    }
-
     override fun onAttached(mapboxNavigation: MapboxNavigation) {
         super.onAttached(mapboxNavigation)
-        if (debug) {
-            debugger.enabled = true
-            navigationCamera.debugger = debugger
-            viewportDataSource.debugger = debugger
-        }
 
-        mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
+        mapPluginProvider.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
 
         cameraViewModel.state.map { it.cameraPadding }.observe {
             viewportDataSource.overviewPadding = it
@@ -79,7 +68,7 @@ class CameraComponent constructor(
 
     override fun onDetached(mapboxNavigation: MapboxNavigation) {
         super.onDetached(mapboxNavigation)
-        mapView.camera.removeCameraAnimationsLifecycleListener(gesturesHandler)
+        mapPluginProvider.camera.removeCameraAnimationsLifecycleListener(gesturesHandler)
     }
 
     private fun controlCameraFrameOverrides() {
@@ -111,6 +100,7 @@ class CameraComponent constructor(
     }
 
     private fun updateCameraLocation() {
+        logI("CarCameraComponent updateCameraLocation", "kyle_debug")
         coroutineScope.launch {
             combine(
                 locationViewModel.state,
