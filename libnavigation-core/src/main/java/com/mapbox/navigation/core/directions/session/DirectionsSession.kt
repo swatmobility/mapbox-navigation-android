@@ -9,6 +9,9 @@ import com.mapbox.navigation.base.route.Router
 
 internal interface DirectionsSession {
 
+    @RoutesExtra.RoutesUpdateReason
+    val routesUpdateReason: String
+
     /**
      * Routes that were fetched from [Router] or set manually.
      * On [routes] change notify registered [RoutesObserver]

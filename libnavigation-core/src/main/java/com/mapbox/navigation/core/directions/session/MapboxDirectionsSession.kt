@@ -32,7 +32,9 @@ internal class MapboxDirectionsSession(
     override var routes: List<NavigationRoute> = emptyList()
         private set
 
-    private var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+    @RoutesExtra.RoutesUpdateReason
+    override var routesUpdateReason: String = RoutesExtra.ROUTES_UPDATE_REASON_CLEAN_UP
+        private set
 
     override var initialLegIndex = 0
         private set
