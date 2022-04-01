@@ -20,6 +20,7 @@ import com.mapbox.navigation.ui.maps.camera.state.NavigationCameraState
 import com.mapbox.navigation.ui.maps.camera.transition.NavigationCameraTransitionOptions
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -63,11 +64,14 @@ internal class CameraComponent constructor(
 
         mapView.camera.addCameraAnimationsLifecycleListener(gesturesHandler)
 
-        cameraViewModel.state.map { it.cameraPadding }.observe {
-            viewportDataSource.overviewPadding = it
-            viewportDataSource.followingPadding = it
-            viewportDataSource.evaluate()
-        }
+        cameraViewModel.state
+            .map { it.cameraPadding }
+            .distinctUntilChanged()
+            .observe {
+                viewportDataSource.overviewPadding = it
+                viewportDataSource.followingPadding = it
+                viewportDataSource.evaluate()
+            }
 
         controlCameraFrameOverrides()
         updateCameraFrame()
@@ -101,13 +105,14 @@ internal class CameraComponent constructor(
     }
 
     private fun updateCameraFrame() {
-        coroutineScope.launch {
-            cameraViewModel.state.collect { state ->
+        cameraViewModel.state
+            .map { it.cameraMode }
+            .distinctUntilChanged()
+            .observe {
                 if (isCameraInitialized) {
-                    requestCameraModeTo(cameraMode = state.cameraMode)
+                    requestCameraModeTo(cameraMode = it)
                 }
             }
-        }
     }
 
     private fun updateCameraLocation() {

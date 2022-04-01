@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.maps.MapView
 import com.mapbox.navigation.base.ExperimentalPreviewMapboxNavigationAPI
 import com.mapbox.navigation.dropin.binder.UIBinder
+import com.mapbox.navigation.dropin.component.camera.CameraStateCache
 import com.mapbox.navigation.dropin.component.destination.DestinationAction
 import com.mapbox.navigation.dropin.component.destination.DestinationState
 import com.mapbox.navigation.dropin.component.marker.MapMarkerFactory
@@ -43,6 +44,7 @@ internal class DropInNavigationViewContext(
     val destinationState: StateFlow<DestinationState> get() = viewModel.destinationViewModel.state
 
     val mapStyleLoader = MapStyleLoader(context, options)
+    val cameraStateCache = CameraStateCache(viewModel.cameraViewModel)
 
     //region Builders & Factories
 
