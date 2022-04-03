@@ -17,7 +17,7 @@
         android:paddingTop="8dp"
         android:text="@string/muted"
         android:textColor="?attr/navigationViewSecondary"
-        android:textSize="14sp"
+        android:textSize="14dp"
         android:textStyle="bold"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"

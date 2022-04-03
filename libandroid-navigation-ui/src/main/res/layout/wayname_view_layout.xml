@@ -19,6 +19,7 @@
         android:paddingBottom="@dimen/wayname_padding_bottom"
         android:textColor="?attr/navigationViewAccent"
         android:textStyle="bold"
-        tools:text="Wayname Text"/>
+        tools:text="Wayname Text"
+        android:textSize="14dp"/>
 
 </FrameLayout>

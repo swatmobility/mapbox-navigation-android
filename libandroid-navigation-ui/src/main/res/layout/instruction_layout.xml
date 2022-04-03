@@ -41,7 +41,7 @@
             android:ellipsize="end"
             android:text="@string/rerouting"
             android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="20sp"
+            android:textSize="20dp"
             android:textStyle="bold"/>
 
     </LinearLayout>
