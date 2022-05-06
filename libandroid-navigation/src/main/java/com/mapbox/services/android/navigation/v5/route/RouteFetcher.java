@@ -43,6 +43,15 @@ public class RouteFetcher {
   private NavigationRoute navigationRoute;
   private RouteProgress routeProgress;
   private RouteUtils routeUtils;
+  private Location location;
+
+  public RouteProgress getRouteProgress() {
+    return routeProgress;
+  }
+
+  public Location getLocation() {
+    return location;
+  }
 
   public RouteFetcher(Context context, String accessToken) {
     this.accessToken = accessToken;
@@ -97,6 +106,7 @@ public class RouteFetcher {
    */
   public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
+    this.location = location;
     NavigationRoute.Builder builder = buildRequestFrom(location, routeProgress);
     findRouteWith(builder);
   }
@@ -113,6 +123,8 @@ public class RouteFetcher {
    */
   @Nullable
   public NavigationRoute.Builder buildRequestFrom(Location location, RouteProgress routeProgress) {
+    this.routeProgress = routeProgress;
+    this.location = location;
     Context context = contextWeakReference.get();
     if (invalid(context, location, routeProgress)) {
       return null;

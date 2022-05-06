@@ -92,6 +92,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private boolean isSubscribed;
   private LifecycleRegistry lifecycleRegistry;
 
+  public NavigationViewModel getNavigationViewModel() {
+    return navigationViewModel;
+  }
+
   public NavigationView(Context context) {
     this(context, null);
   }

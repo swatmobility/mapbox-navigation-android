@@ -88,6 +88,15 @@ public class NavigationViewModel extends AndroidViewModel {
   private boolean isChangingConfigurations;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
+  private RouteFetcher routeFetcher;
+
+  public RouteFetcher getRouteFetcher() {
+    return routeFetcher;
+  }
+
+  public NavigationViewRouter getRouter() {
+    return router;
+  }
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -303,6 +312,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void initializeRouter() {
     RouteFetcher onlineRouter = new RouteFetcher(getApplication(), accessToken);
+    routeFetcher = onlineRouter;
     Context applicationContext = getApplication().getApplicationContext();
     ConnectivityStatusProvider connectivityStatus = new ConnectivityStatusProvider(applicationContext);
     router = new NavigationViewRouter(onlineRouter, connectivityStatus, routeEngineListener);
