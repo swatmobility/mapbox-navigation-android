@@ -6,6 +6,7 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -533,7 +534,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeNavigationViewModel() {
     try {
-      navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+      navigationViewModel = ViewModelProviders.of((FragmentActivity) getActivityContext()).get(NavigationViewModel.class);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
@@ -612,7 +613,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private boolean isChangingConfigurations() {
     try {
-      return ((FragmentActivity) getContext()).isChangingConfigurations();
+      return ((FragmentActivity) getActivityContext()).isChangingConfigurations();
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
@@ -725,5 +726,23 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationViewModel.onDestroy(isChangingConfigurations());
     ImageCreator.getInstance().shutdown();
     navigationMap = null;
+  }
+
+  private Context getActivityContext(){
+    Context context = getContext();
+    Context currentContext;
+    if (context instanceof ContextWrapper){
+      if (context instanceof Activity)
+      {
+        currentContext = context;
+      }
+      else
+      {
+        currentContext = (((ContextWrapper) context).getBaseContext());
+      }
+    }else {
+      currentContext = context;
+    }
+    return currentContext;
   }
 }
