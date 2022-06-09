@@ -16,6 +16,7 @@ import com.mapbox.api.directions.v5.WalkingOptions;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.core.MapboxService;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
@@ -152,8 +153,13 @@ public final class NavigationRoute {
      * @return this builder for chaining options together
      * @since 0.5.0
      */
-    public Builder user(@NonNull String user) {
+    public Builder user(@Nullable String user) {
       directionsBuilder.user(user);
+      return this;
+    }
+
+    public Builder basicAuth(@Nullable String basicAuth) {
+      directionsBuilder.basicAuth(basicAuth);
       return this;
     }
 
@@ -688,6 +694,11 @@ public final class NavigationRoute {
         directionsBuilder.radiuses(splitRadiuses);
       }
 
+      return this;
+    }
+
+    public Builder startTime(String startTime) {
+      directionsBuilder.startTime(startTime);
       return this;
     }
 
