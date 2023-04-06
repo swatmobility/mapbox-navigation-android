@@ -60,7 +60,7 @@ android {
     }
     release {
       minifyEnabled true
-      signingConfig signingConfigs.release
+//      signingConfig signingConfigs.release
       manifestPlaceholders = [enableCrashReporting:"true"]
     }
   }
@@ -89,8 +89,8 @@ dependencies {
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
-  implementation dependenciesList.mapboxSearchSdk
-  implementation dependenciesList.mapboxCrashMonitor
+//  implementation dependenciesList.mapboxSearchSdk
+//  implementation dependenciesList.mapboxCrashMonitor
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7

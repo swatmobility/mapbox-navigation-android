@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jaredsburrows.license'
+//apply plugin: 'com.jaredsburrows.license'
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -41,12 +41,12 @@ android {
     }
   }
 
-  licenseReport {
-    generateHtmlReport = false
-    generateJsonReport = true
-    copyHtmlReportToAssets = false
-    copyJsonReportToAssets = false
-  }
+//  licenseReport {
+//    generateHtmlReport = false
+//    generateJsonReport = true
+//    copyHtmlReportToAssets = false
+//    copyJsonReportToAssets = false
+//  }
 }
 
 dependencies {

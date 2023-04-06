@@ -36,7 +36,21 @@ allprojects {
     mavenCentral()
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
-    maven { url 'https://mapbox.bintray.com/mapbox' }
+    maven {
+//      url 'https://mapbox.bintray.com/mapbox'
+      url 'https://api.mapbox.com/downloads/v2/releases/maven'
+      authentication {
+        basic(BasicAuthentication)
+      }
+      credentials {
+        username = "mapbox"
+        password = "sk.eyJ1Ijoib2xlZ2RlZyIsImEiOiJjbGc1NmE2NnMwMGg1M2Nybmp4YTZ1Nm8zIn0.aD-nBxB1H4e3llfhtg2Ehg"
+      }
+    }
+
+    flatDir {
+      dirs("libs")
+    }
 //    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
 

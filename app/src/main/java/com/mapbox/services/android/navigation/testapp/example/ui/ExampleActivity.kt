@@ -121,7 +121,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     }
   }
 
-  override fun onFeatureClicked(feature: CarmenFeature) {
+  fun onFeatureClicked(feature: CarmenFeature) {
     presenter.onDestinationFound(feature)
   }
 
@@ -181,13 +181,13 @@ class ExampleActivity : HistoryActivity(), ExampleView {
   }
 
   override fun updateAutocompleteProximity(location: Location?) {
-    autocompleteView.updateProximity(location)
+//    autocompleteView.updateProximity(location)
   }
 
   override fun selectAllAutocompleteText() {
-    if (autocompleteView.text.isNotEmpty()) {
-      autocompleteView.selectAll()
-    }
+//    if (autocompleteView.text.isNotEmpty()) {
+//      autocompleteView.selectAll()
+//    }
   }
 
   override fun updateLocationFabVisibility(visibility: Int) {
@@ -292,8 +292,8 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     behavior.setBottomSheetCallback(AutoCompleteBottomSheetCallback(presenter))
 
     autocompleteView.setOnClickListener { presenter.onAutocompleteClick() }
-    autocompleteView.setAdapter(ExampleAutocompleteAdapter(this))
-    autocompleteView.setFeatureClickListener(this)
+//    autocompleteView.setAdapter(ExampleAutocompleteAdapter(this))
+//    autocompleteView.setFeatureClickListener(this)
 
     settingsFab.setOnClickListener { presenter.onSettingsFabClick() }
     locationFab.setOnClickListener { presenter.onLocationFabClick() }

@@ -6,17 +6,17 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.TextView
-import com.mapbox.android.search.autocomplete.AutocompleteAdapter
+//import com.mapbox.android.search.autocomplete.AutocompleteAdapter
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
 import com.mapbox.services.android.navigation.testapp.R
 
-class ExampleAutocompleteAdapter(private val context: Context) : AutocompleteAdapter(context) {
-
-  override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-    val view = inflateView(convertView, parent)
-    val feature = getItem(position)
-    return updateViewData(view, feature)
-  }
+//class ExampleAutocompleteAdapter(private val context: Context) : AutocompleteAdapter(context) {
+class ExampleAutocompleteAdapter(private val context: Context) {
+//  fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+//    val view = inflateView(convertView, parent)
+//    val feature = getItem(position)
+//    return updateViewData(view, feature)
+//  }
 
   private fun inflateView(convertView: View?, parent: ViewGroup?): View {
     return if (convertView == null) {

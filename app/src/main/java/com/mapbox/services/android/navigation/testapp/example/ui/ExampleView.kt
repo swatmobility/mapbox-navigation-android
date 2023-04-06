@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui
 import android.location.Location
 import android.view.View
 import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.search.autocomplete.OnFeatureClickListener
+//import com.mapbox.android.search.autocomplete.OnFeatureClickListener
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
@@ -17,7 +17,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 interface ExampleView: PermissionsListener, OnMapReadyCallback,
-    OnFeatureClickListener, OnRouteSelectionChangeListener {
+     OnRouteSelectionChangeListener {
 
   fun initialize()
 
