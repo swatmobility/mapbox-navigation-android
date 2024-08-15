@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.ContextUtils;
 
 public class CustomNavigationNotification implements NavigationNotification {
 
@@ -73,7 +74,7 @@ public class CustomNavigationNotification implements NavigationNotification {
 
   public void register(BroadcastReceiver stopNavigationReceiver, Context applicationContext) {
     this.stopNavigationReceiver = stopNavigationReceiver;
-    applicationContext.registerReceiver(stopNavigationReceiver, new IntentFilter(STOP_NAVIGATION_ACTION));
+    ContextUtils.registerReceiver(applicationContext, stopNavigationReceiver, new IntentFilter(STOP_NAVIGATION_ACTION));
   }
 
   private PendingIntent createPendingStopIntent(Context context) {

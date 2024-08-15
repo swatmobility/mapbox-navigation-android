@@ -6,6 +6,8 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Build;
 
+import com.mapbox.services.android.navigation.v5.utils.ContextUtils;
+
 class MapBatteryMonitor {
 
   private static final int DEFAULT_BATTERY_LEVEL = -1;
@@ -28,6 +30,6 @@ class MapBatteryMonitor {
 
   private static Intent registerBatteryUpdates(Context context) {
     IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-    return context.registerReceiver(null, filter);
+    return ContextUtils.registerReceiver(context, null, filter);
   }
 }

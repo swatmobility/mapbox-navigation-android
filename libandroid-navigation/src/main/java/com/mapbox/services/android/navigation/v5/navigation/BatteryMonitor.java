@@ -6,6 +6,8 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Build;
 
+import com.mapbox.services.android.navigation.v5.utils.ContextUtils;
+
 class BatteryMonitor {
 
   private static final int UNAVAILABLE_BATTERY_LEVEL = -1;
@@ -47,6 +49,6 @@ class BatteryMonitor {
 
   private Intent registerBatteryUpdates(Context context) {
     IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-    return context.registerReceiver(null, filter);
+    return ContextUtils.registerReceiver(context, null, filter);
   }
 }

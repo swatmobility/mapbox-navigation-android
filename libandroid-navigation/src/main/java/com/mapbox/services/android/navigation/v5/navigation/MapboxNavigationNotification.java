@@ -26,6 +26,7 @@ import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
@@ -247,7 +248,7 @@ class MapboxNavigationNotification implements NavigationNotification {
 
   private void registerReceiver(Context applicationContext) {
     if (applicationContext != null) {
-      applicationContext.registerReceiver(endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
+      ContextUtils.registerReceiver(applicationContext, endNavigationBtnReceiver, new IntentFilter(END_NAVIGATION_ACTION));
     }
   }
 
