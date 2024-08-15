@@ -1,7 +1,6 @@
 //
 // Configuration file for gradle build execution.
 //
-
 task accessToken {
   def tokenFile = new File("${projectDir}/src/main/res/values/developer-config.xml")
   if (!tokenFile.exists()) {
