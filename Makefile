@@ -14,34 +14,34 @@ test:
 	gradle :libandroid-navigation-ui:test
 
 build-release:
-	./gradlew :libandroid-navigation:assembleRelease
-	./gradlew :libandroid-navigation-ui:assembleRelease
+	gradle :libandroid-navigation:assembleRelease
+	gradle :libandroid-navigation-ui:assembleRelease
 
 javadoc:
-	./gradlew :libandroid-navigation:javadocrelease
-	./gradlew :libandroid-navigation-ui:javadocrelease
+	gradle :libandroid-navigation:javadocrelease
+	gradle :libandroid-navigation-ui:javadocrelease
 
 publish:
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=false; gradle :libandroid-navigation:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=false; gradle :libandroid-navigation-ui:uploadArchives
 
 publish-local:
 	# This publishes to ~/.m2/repository/com/mapbox/mapboxsdk
-	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
-	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=true; gradle :libandroid-navigation:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=true; gradle :libandroid-navigation-ui:uploadArchives
 
 graphs:
-	./gradlew :libandroid-navigation:generateDependencyGraphMapboxLibraries
-	./gradlew :libandroid-navigation-ui:generateDependencyGraphMapboxLibraries
+	gradle :libandroid-navigation:generateDependencyGraphMapboxLibraries
+	gradle :libandroid-navigation-ui:generateDependencyGraphMapboxLibraries
 
 dependency-updates:
-	./gradlew :libandroid-navigation:dependencyUpdates
-	./gradlew :libandroid-navigation-ui:dependencyUpdates
-	./gradlew :app:dependencyUpdates
+	gradle :libandroid-navigation:dependencyUpdates
+	gradle :libandroid-navigation-ui:dependencyUpdates
+	gradle :app:dependencyUpdates
 
 dex-count:
-	./gradlew countDebugDexMethods
-	./gradlew countReleaseDexMethods
+	gradle countDebugDexMethods
+	gradle countReleaseDexMethods
 
 navigation-fixtures:
 	# Navigation: Taylor street to Page street
