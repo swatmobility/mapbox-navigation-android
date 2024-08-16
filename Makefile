@@ -1,17 +1,17 @@
 checkstyle:
-	./gradlew checkstyle
+	gradle checkstyle
 
 nitpick:
-	./gradlew nitpick
+	gradle nitpick
 
 license:
-	./gradlew licenseReleaseReport
+	gradle licenseReleaseReport
 	python ./scripts/generate-license.py
 
 test:
 	# See libandroid-navigation/build.gradle for details
-	./gradlew :libandroid-navigation:test
-	./gradlew :libandroid-navigation-ui:test
+	gradle :libandroid-navigation:test
+	gradle :libandroid-navigation-ui:test
 
 build-release:
 	./gradlew :libandroid-navigation:assembleRelease

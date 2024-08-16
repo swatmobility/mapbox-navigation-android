@@ -1,5 +1,4 @@
 apply plugin: 'com.github.kt3k.coveralls'
-apply plugin: 'jacoco'
 
 buildscript {
   apply from: "${rootDir}/gradle/dependencies.gradle"
@@ -17,11 +16,9 @@ buildscript {
     classpath pluginDependencies.coveralls
     classpath pluginDependencies.errorprone
     classpath pluginDependencies.dependencyUpdates
-    classpath pluginDependencies.jacoco
     classpath pluginDependencies.playPublisher
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.crashlytics
-    classpath pluginDependencies.license
   }
 }
 
@@ -37,7 +34,6 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven {
-//      url 'https://mapbox.bintray.com/mapbox'
       url 'https://api.mapbox.com/downloads/v2/releases/maven'
       authentication {
         basic(BasicAuthentication)
@@ -51,7 +47,6 @@ allprojects {
     flatDir {
       dirs("libs")
     }
-//    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
 
   group = GROUP
@@ -60,12 +55,7 @@ allprojects {
 
 subprojects {
   apply plugin: 'idea'
-  apply plugin: 'net.ltgt.errorprone'
   apply from: "${rootDir}/gradle/dependencies.gradle"
-
-  dependencies {
-    errorprone dependenciesList.errorprone
-  }
 }
 
 task clean(type: Delete) {
