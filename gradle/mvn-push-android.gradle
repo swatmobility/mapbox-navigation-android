@@ -61,14 +61,19 @@ afterEvaluate { project ->
         pom.version = VERSION_NAME
 
         if (isLocalBuild()) {
-          repository(url: obtainMavenLocalUrl())
+          def url = obtainMavenLocalUrl()
+          println("isLocalBuild url: $url")
+          repository(url: url)
         } else {
-          repository(url: getReleaseRepositoryUrl()) {
-            authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+          def url = getReleaseRepositoryUrl()
+          println("getReleaseRepositoryUrl url: $url, $POM_NAME")
+          repository(url: url) {
+            def result = authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+            println("result: $result")
           }
-          snapshotRepository(url: getSnapshotRepositoryUrl()) {
-            authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-          }
+//          snapshotRepository(url: getSnapshotRepositoryUrl()) {
+//            authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+//          }
         }
 
         pom.project {
@@ -95,6 +100,7 @@ afterEvaluate { project ->
             developer {
               id POM_DEVELOPER_ID
               name POM_DEVELOPER_NAME
+              email POM_DEVELOPER_EMAIL
             }
           }
         }
