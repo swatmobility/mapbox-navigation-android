@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
@@ -41,6 +42,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
@@ -529,7 +531,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeNavigationViewModel() {
     try {
-      navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+      navigationViewModel = ViewModelProviders.of((FragmentActivity) ContextUtils.getActivityContext(getContext())).get(NavigationViewModel.class);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
@@ -608,7 +610,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private boolean isChangingConfigurations() {
     try {
-      return ((FragmentActivity) getContext()).isChangingConfigurations();
+      return ((FragmentActivity) ContextUtils.getActivityContext(getContext())).isChangingConfigurations();
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
@@ -722,4 +724,5 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     ImageCreator.getInstance().shutdown();
     navigationMap = null;
   }
+
 }

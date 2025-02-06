@@ -1,8 +1,10 @@
 package com.mapbox.services.android.navigation.v5.utils;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -18,6 +20,23 @@ public final class ContextUtils {
         } else {
             return context.registerReceiver(receiver, filter);
         }
+    }
+
+    public static Context getActivityContext(Context context){
+        Context currentContext;
+        if (context instanceof ContextWrapper){
+            if (context instanceof Activity)
+            {
+                currentContext = context;
+            }
+            else
+            {
+                currentContext = (((ContextWrapper) context).getBaseContext());
+            }
+        }else {
+            currentContext = context;
+        }
+        return currentContext;
     }
 
 }
